@@ -1,25 +1,67 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { SplashPage, MSLPage } from "./pages";
+import { Box } from "@chakra-ui/react";
 
-function App() {
+const customTheme = extendTheme({
+  components: {
+    Table: {
+      variants: {
+        msltable: {
+          th: {
+            color: "white",
+            fontSize: "sm",
+            background: "#081935",
+          },
+          tr: {
+            _even: {
+              background: "#081935",
+            },
+          },
+          td: {
+            border: "1px dotted #2D3748",
+            borderBottom: "2px solid #2D3748",
+          },
+        },
+      },
+    },
+    Tabs: {
+      variants: {
+        enclosed: {
+          tablist: {
+            borderColor: "gray.800",
+          },
+          tab: {
+            _selected: {
+              background: "#010711",
+              color: "white",
+              border: "1px solid gray.800",
+              fontWeight: "bold",
+            },
+            _focus: {
+              boxShadow: "none",
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+const App = () => {
+  const [shift, setShift] = useState(null);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ChakraProvider theme={customTheme}>
+      <Box bg="gray.700" height="100VH" overflow="hidden">
+        {!shift ? (
+          <SplashPage setShift={setShift} />
+        ) : (
+          <MSLPage shift={shift} />
+        )}
+      </Box>
+    </ChakraProvider>
   );
-}
+};
 
 export default App;
