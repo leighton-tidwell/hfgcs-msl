@@ -22,13 +22,13 @@ import { Select, Input, Textarea, RankSelect } from "../";
 import { getShiftPersonnel } from "../../api";
 import dayjs from "dayjs";
 
-const EndRaday = ({ shift, actionEntry, onSubmit }) => {
+const ShiftChangeOffDuty = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [error, setError] = useState("");
 
   const [shiftMembers, setShiftMembers] = useState([]);
   const [formData, setFormData] = useState({
-    category: "END RADAY",
+    category: "SHIFT CHANGE",
     zuluDate: dayjs().format("YYYY-MM-DD"),
     time: dayjs().format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
@@ -64,7 +64,7 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
 
     setFormData({
       ...formData,
-      category: "END RAYDAY",
+      category: "SHIFT CHANGE",
       zuluDate: dayjs().format("YYYY-MM-DD"),
       time: dayjs().format("HHmm"),
       action: "",
@@ -98,7 +98,7 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
   useEffect(() => {
     setFormData((prevData) => ({
       ...prevData,
-      action: `(U) ${formData.shiftLeadRank} __________________________ & ${shift} SHIFT ON DUTY ATT//`,
+      action: `(U) ${formData.shiftLeadRank} __________________________ & ${shift} SHIFT OFF DUTY ATT//`,
     }));
   }, [
     formData.zuluDate,
@@ -115,7 +115,7 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent bg="gray.900" color="white">
-          <ModalHeader>END RADAY</ModalHeader>
+          <ModalHeader>SHIFT CHANGE (OFF DUTY)</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={4}>
@@ -207,4 +207,4 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
   );
 };
 
-export default EndRaday;
+export default ShiftChangeOffDuty;

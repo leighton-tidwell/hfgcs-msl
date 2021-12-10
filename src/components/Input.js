@@ -7,6 +7,8 @@ const Input = ({
   onChange,
   placeholder,
   variant = "outline",
+  isDisabled = false,
+  name,
   isInvalid,
 }) => {
   return (
@@ -15,6 +17,8 @@ const Input = ({
       value={value}
       onChange={onChange}
       placeholder={placeholder}
+      isDisabled={isDisabled}
+      name={name}
       rounded="sm"
       borderColor="blue.700"
       borderWidth="2px"

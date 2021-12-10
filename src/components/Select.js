@@ -7,6 +7,7 @@ const Select = ({
   onChange,
   value,
   placeholder,
+  name,
 }) => {
   return (
     <ChakraSelect
@@ -14,6 +15,7 @@ const Select = ({
       variant={variant}
       onChange={onChange}
       value={value}
+      name={name}
       placeholder={placeholder}
       borderColor="blue.700"
       borderWidth="2px"

@@ -137,15 +137,10 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
             <VStack spacing={4}>
               <FormControl id="event-category" isRequired>
                 <FormLabel>Event Category</FormLabel>
-                <Select
+                <Input
                   onChange={handleCategoryChange}
                   value={entry.eventcategory}
-                  placeholder="Select Option"
-                >
-                  <option value="option1">Option 1</option>
-                  <option value="option2">Option 2</option>
-                  <option value="option3">Option 3</option>
-                </Select>
+                />
               </FormControl>
               <FormControl id="date" isRequired>
                 <FormLabel>Zulu Date</FormLabel>

@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 const sampleResults = [
   {
     Id: "1eeee",
-    eventcategory: "option1",
+    eventcategory: "SHIFT CHANGE (ON DUTY)",
     entrydate: dayjs().format("MM/DD/YYYY"),
     entrytime: "1256",
     operatorinitials: "JT",
@@ -13,7 +13,7 @@ const sampleResults = [
   },
   {
     Id: "2eeee",
-    eventcategory: "option1",
+    eventcategory: "NU RADAY",
     entrydate: dayjs().format("MM/DD/YYYY"),
     entrytime: "1456",
     operatorinitials: "JT",
@@ -22,7 +22,7 @@ const sampleResults = [
   },
   {
     Id: "3eeee",
-    eventcategory: "option1",
+    eventcategory: "SHIFT CHANGE (OFF DUTY)",
     entrydate: dayjs().format("MM/DD/YYYY"),
     entrytime: "2055",
     operatorinitials: "JT",

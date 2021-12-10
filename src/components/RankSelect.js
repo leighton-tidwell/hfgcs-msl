@@ -1,8 +1,13 @@
 import React from "react";
 import { Select } from ".";
 
-const RankSelect = ({ value, onChange, placeholder }) => (
-  <Select value={value} onChange={onChange} placeholder={placeholder}>
+const RankSelect = ({ value, onChange, placeholder, name }) => (
+  <Select
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    name={name}
+  >
     <option value="AB">AB</option>
     <option value="AMN">AMN</option>
     <option value="A1C">A1C</option>

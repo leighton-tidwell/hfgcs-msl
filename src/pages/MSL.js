@@ -5,7 +5,7 @@ import {
   EntryForm,
   EntryTable,
   SettingsModal,
-  PrintIcon,
+  PrintModal,
   DatePicker,
 } from "../components";
 import { Box } from "@chakra-ui/react";
@@ -116,6 +116,7 @@ const MSLPage = ({ shift }) => {
             setActionEntry={setActionEntry}
             actionEntry={actionEntry}
             onSubmit={submitActionEntry}
+            shift={shift}
           />
         </Box>
         <Box display="flex" flexGrow="1" flexDir="column">
@@ -129,7 +130,7 @@ const MSLPage = ({ shift }) => {
             <DatePicker onChange={updateDate} date={date} />
             <Box float="right">
               <SettingsModal />
-              <PrintIcon />
+              <PrintModal />
             </Box>
           </Box>
           <EntryTable
@@ -137,7 +138,6 @@ const MSLPage = ({ shift }) => {
             removeEntry={removeActionEntry}
             date={date}
             entries={entries}
-            shift={shift}
           />
         </Box>
       </Box>

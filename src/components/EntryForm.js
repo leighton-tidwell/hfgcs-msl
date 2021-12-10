@@ -14,7 +14,7 @@ import {
 import { Textarea, Select, Input } from ".";
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
-import { EndRaday } from "./events";
+import { EndRaday, ShiftChangeOffDuty } from "./events";
 
 const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
   const [error, setError] = useState("");
@@ -25,10 +25,16 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
       id: uuidv4(),
       name: "END RADAY",
       component: (
-        <EndRaday
-          setActionEntry={setActionEntry}
-          onSubmit={onSubmit}
+        <EndRaday actionEntry={actionEntry} onSubmit={onSubmit} shift={shift} />
+      ),
+    },
+    {
+      id: uuidv4(),
+      name: "SHIFT CHANGE (OFF DUTY)",
+      component: (
+        <ShiftChangeOffDuty
           actionEntry={actionEntry}
+          onSubmit={onSubmit}
           shift={shift}
         />
       ),
@@ -42,6 +48,7 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
     const formBuilder = eventCategoryOptions.find(
       (option) => option.name === e.target.value
     );
+    if (!formBuilder) return setFormBuilder(null);
     setFormBuilder(formBuilder.component);
   };
 

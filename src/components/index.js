@@ -13,6 +13,7 @@ export { default as Logo } from "./Logo";
 export { default as MainSettings } from "./MainSettings";
 export { default as PersonnelSettings } from "./PersonnelSettings";
 export { default as PrintIcon } from "./PrintIcon";
+export { default as PrintModal } from "./PrintModal";
 export { default as RankSelect } from "./RankSelect";
 export { default as SecretBanner } from "./SecretBanner";
 export { default as Select } from "./Select";
