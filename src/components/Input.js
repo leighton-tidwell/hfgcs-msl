@@ -9,16 +9,20 @@ const Input = ({
   variant = "outline",
   isDisabled = false,
   name,
+  size,
   isInvalid,
+  onBlur,
 }) => {
   return (
     <ChakraInput
       type={type}
       value={value}
       onChange={onChange}
+      onBlur={onBlur}
       placeholder={placeholder}
       isDisabled={isDisabled}
       name={name}
+      size={size}
       rounded="sm"
       borderColor="blue.700"
       borderWidth="2px"

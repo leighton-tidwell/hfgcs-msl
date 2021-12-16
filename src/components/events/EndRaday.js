@@ -98,7 +98,7 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
   useEffect(() => {
     setFormData((prevData) => ({
       ...prevData,
-      action: `(U) ${formData.shiftLeadRank} __________________________ & ${shift} SHIFT ON DUTY ATT//`,
+      action: `(U) ${formData.shiftLeadRank} __________________________ & ${shift} SHIFT OFF DUTY ATT//`,
     }));
   }, [
     formData.zuluDate,

@@ -46,9 +46,10 @@ const MSLPage = ({ shift }) => {
       Id: response,
     };
 
-    setEntries((prevEntries) =>
-      [...prevEntries, entryWithId].sort((a, b) => (a.time > b.time ? 1 : -1))
-    );
+    if (entry.zuluDate === date)
+      setEntries((prevEntries) =>
+        [...prevEntries, entryWithId].sort((a, b) => (a.time > b.time ? 1 : -1))
+      );
   };
 
   const updateActionEntry = async (entry) => {
@@ -110,6 +111,7 @@ const MSLPage = ({ shift }) => {
           maxHeight="500px"
           mr={10}
           flexDir="column"
+          flexGrow="1"
         >
           <Logo />
           <EntryForm
@@ -119,7 +121,7 @@ const MSLPage = ({ shift }) => {
             shift={shift}
           />
         </Box>
-        <Box display="flex" flexGrow="1" flexDir="column">
+        <Box display="flex" flexBasis="60%" flexDir="column">
           <Box
             mb={2}
             textAlign="center"

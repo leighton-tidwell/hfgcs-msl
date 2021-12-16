@@ -14,7 +14,13 @@ import {
 import { Textarea, Select, Input } from ".";
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
-import { EndRaday, ShiftChangeOffDuty } from "./events";
+import {
+  EndRaday,
+  ShiftChangeOffDuty,
+  Checklist101End,
+  Checklist108End,
+  BeginNuRaday,
+} from "./events";
 
 const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
   const [error, setError] = useState("");
@@ -33,6 +39,39 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
       name: "SHIFT CHANGE (OFF DUTY)",
       component: (
         <ShiftChangeOffDuty
+          actionEntry={actionEntry}
+          onSubmit={onSubmit}
+          shift={shift}
+        />
+      ),
+    },
+    {
+      id: uuidv4(),
+      name: "CHKLST NOTE - 101 (END)",
+      component: (
+        <Checklist101End
+          actionEntry={actionEntry}
+          onSubmit={onSubmit}
+          shift={shift}
+        />
+      ),
+    },
+    {
+      id: uuidv4(),
+      name: "CHKLST NOTE - 108 (END)",
+      component: (
+        <Checklist108End
+          actionEntry={actionEntry}
+          onSubmit={onSubmit}
+          shift={shift}
+        />
+      ),
+    },
+    {
+      id: uuidv4(),
+      name: "BEGIN NU RAYDAY",
+      component: (
+        <BeginNuRaday
           actionEntry={actionEntry}
           onSubmit={onSubmit}
           shift={shift}

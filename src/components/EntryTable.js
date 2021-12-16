@@ -4,17 +4,23 @@ import { EditEntryModal, EditIcon } from ".";
 
 const EntryTable = ({ entries, updateEntry, removeEntry }) => {
   return (
-    <Box bg="#010711" color="white" height="100%" rounded="sm">
+    <Box
+      bg="#010711"
+      color="white"
+      maxHeight="100%"
+      overflowY="auto"
+      rounded="sm"
+    >
       <Table variant="msltable" rounded="sm">
-        <Thead>
+        <Thead position="sticky" top="0">
           <Tr>
-            <Th>
+            <Th position="sticky">
               <EditIcon />
             </Th>
-            <Th>Event Category</Th>
-            <Th>Zulu Time</Th>
-            <Th>OP INITS</Th>
-            <Th>ACTION/EVENT</Th>
+            <Th position="sticky">Event Category</Th>
+            <Th position="sticky">Zulu Time</Th>
+            <Th position="sticky">OP INITS</Th>
+            <Th position="sticky">ACTION/EVENT</Th>
           </Tr>
         </Thead>
         <Tbody>

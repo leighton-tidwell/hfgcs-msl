@@ -35,7 +35,7 @@ const sampleData = [
     lastname: "BARNES",
     initials: "MJ",
     isShiftLead: "true",
-    status: "ON DUTY",
+    status: "SHIFT LEAD",
   },
   {
     Id: "5dfddd",

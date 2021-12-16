@@ -7,12 +7,14 @@ const Textarea = ({
   onChange,
   variant = "outline",
   isInvalid,
+  minHeight,
 }) => {
   return (
     <ChakraTextarea
       placeholder={placeholder}
       value={value}
       onChange={onChange}
+      minHeight={minHeight}
       rounded="sm"
       borderColor="blue.700"
       borderWidth="2px"

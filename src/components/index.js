@@ -20,4 +20,5 @@ export { default as Select } from "./Select";
 export { default as SettingsIcon } from "./SettingsIcon";
 export { default as SettingsModal } from "./SettingsModal";
 export { default as ShiftSelect } from "./ShiftSelect";
+export { default as StationStatus } from "./StationStatus";
 export { default as Textarea } from "./Textarea";

@@ -9,7 +9,7 @@ const sampleResults = [
     entrytime: "1256",
     operatorinitials: "JT",
     action:
-      "(U) A lot of random stuff that goes here and I won't actually bother typing the correct stuff.",
+      "(U) A lot of random stuff that goes here and I won't actually bother typing the correct stuff. ATT/ random stuff after this hello",
   },
   {
     Id: "2eeee",
@@ -22,12 +22,12 @@ const sampleResults = [
   },
   {
     Id: "3eeee",
-    eventcategory: "SHIFT CHANGE (OFF DUTY)",
-    entrydate: dayjs().format("MM/DD/YYYY"),
-    entrytime: "2055",
+    eventcategory: "CHKLST NOTE - 108 (END)",
+    entrydate: dayjs().subtract(1, "day").format("MM/DD/YYYY"),
+    entrytime: "2200",
     operatorinitials: "JT",
     action:
-      "(U) A lot of random stuff that goes here and I won't actually bother typing the correct stuff.",
+      "(U) A lot of random stuff that goes here and I won't actually bother typing the correct stuff. ATT/ random stuff after this hello",
   },
 ];
 

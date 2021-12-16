@@ -202,9 +202,95 @@ const PrintModal = () => {
     }
 
     if (e.target.name === "startEvent") {
-      const startEventIndex = eventChoices.findIndex(
-        (event) => event.id === e.target.value
-      );
+      setDocDefinition((prevDoc) => {
+        const newDoc = { ...prevDoc };
+        newDoc.content[0].table.body[2][3].text =
+          eventChoices.find((item) => item.Id === e.target.value).entrytime +
+          "Z";
+        return newDoc;
+      });
+    }
+
+    if (e.target.name === "endEvent") {
+      setDocDefinition((prevDoc) => {
+        const newDoc = { ...prevDoc };
+        newDoc.content[0].table.body[2][4].text =
+          eventChoices.find((item) => item.Id === e.target.value).entrytime +
+          "Z";
+        return newDoc;
+      });
+    }
+
+    if (e.target.name === "startEvent" || e.target.name === "endEvent") {
+      const isStartEvent = e.target.name === "startEvent";
+
+      const startEventIndex = isStartEvent
+        ? eventChoices.findIndex((event) => event.Id === e.target.value)
+        : formData.startEvent
+        ? eventChoices.findIndex((event) => event.Id === formData.startEvent)
+        : 0;
+
+      const endEventIndex = !isStartEvent
+        ? eventChoices.findIndex((event) => event.Id === e.target.value)
+        : formData.endEvent
+        ? eventChoices.findIndex((event) => event.Id === formData.endEvent)
+        : eventChoices.length;
+
+      const items =
+        startEventIndex < endEventIndex
+          ? eventChoices.slice(startEventIndex, endEventIndex + 1)
+          : eventChoices.slice(endEventIndex, startEventIndex + 1).reverse();
+
+      setDocDefinition((prevDoc) => {
+        const newDoc = { ...prevDoc };
+        newDoc.content[1].table.body = items.map((item, i) => [
+          {
+            text: item.eventcategory,
+            borderColor: [
+              "#000000",
+              "#000000",
+              "#000000",
+              i === items.length - 1 ? "#000000" : "#ffffff",
+            ],
+            fontSize: 8,
+          },
+          {
+            text: item.entrytime,
+            borderColor: [
+              "#000000",
+              "#000000",
+              "#000000",
+              i === items.length - 1 ? "#000000" : "#ffffff",
+            ],
+            fontSize: 8,
+          },
+          {
+            text: item.operatorinitials,
+            borderColor: [
+              "#000000",
+              "#000000",
+              "#000000",
+              i === items.length - 1 ? "#000000" : "#ffffff",
+            ],
+            fontSize: 8,
+          },
+          {
+            text: item.action,
+            borderColor: [
+              "#000000",
+              "#000000",
+              "#000000",
+              i === items.length - 1 ? "#000000" : "#ffffff",
+            ],
+            fontSize: 8,
+          },
+        ]);
+
+        console.log("NEW DOC", newDoc);
+
+        return newDoc;
+      });
+
       // const newEvents = eventChoices.
     }
 

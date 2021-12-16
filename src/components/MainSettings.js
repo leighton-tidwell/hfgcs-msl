@@ -16,16 +16,18 @@ import {
   AlertDescription,
 } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
-import { EditIcon, Input } from ".";
+import { EditIcon, Input, Select } from ".";
 import {
   getBroadcastingSchedule,
   getMNCSSchedule,
   updateListItem,
+  getStations,
 } from "../api";
 
 const MainSettings = () => {
   const [broadcastingSchedule, setBroadcastingSchedule] = useState([]);
   const [mncsSchedule, setMncsSchedule] = useState([]);
+  const [stations, setStations] = useState([]);
   const [error, setError] = useState("");
 
   const fetchBroadcastingSchedule = async () => {
@@ -46,6 +48,16 @@ const MainSettings = () => {
     }));
 
     setMncsSchedule(formReadySchedule);
+  };
+
+  const fetchStations = async () => {
+    const response = await getStations();
+    const formReadyStations = response.map((item) => ({
+      ...item,
+      isEditable: false,
+    }));
+
+    setStations(formReadyStations);
   };
 
   const toggleBroadcastItemEditable = async (Id) => {
@@ -96,6 +108,25 @@ const MainSettings = () => {
     );
   };
 
+  const toggleStationItemEditable = async (Id) => {
+    if (stations.find((item) => item.Id === Id).isEditable) {
+      const updatedStationItem = stations.find((item) => item.Id === Id);
+      const formattedStationItem = {
+        Id: updatedStationItem.Id,
+        station: updatedStationItem.station,
+        name: updatedStationItem.name,
+        ncs: updatedStationItem.ncs,
+      };
+      const response = await updateListItem("stations", formattedStationItem);
+    }
+
+    setStations((prevStations) =>
+      prevStations.map((item) =>
+        item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
+      )
+    );
+  };
+
   const handleEditField = (Id, field, value) => {
     setError("");
     setBroadcastingSchedule((prevSchedule) =>
@@ -108,6 +139,11 @@ const MainSettings = () => {
         item.Id === Id ? { ...item, [field]: value } : item
       )
     );
+    setStations((prevStations) =>
+      prevStations.map((item) =>
+        item.Id === Id ? { ...item, [field]: value } : item
+      )
+    );
   };
 
   const clearError = () => {
@@ -117,6 +153,7 @@ const MainSettings = () => {
   useEffect(() => {
     fetchBroadcastingSchedule();
     fetchMNCSSchedule();
+    fetchStations();
   }, []);
 
   return (
@@ -232,6 +269,73 @@ const MainSettings = () => {
                     />
                   ) : (
                     months
+                  )}
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Box>
+      <Box flexGrow="1" ml={2} display="flex" flexDir="column">
+        <Text fontWeight="bold" fontSize="lg">
+          Stations:
+        </Text>
+        <Table variant="msltable" rounded="sm">
+          <Thead>
+            <Tr>
+              <Th>EDIT</Th>
+              <Th>STN</Th>
+              <Th>NAME</Th>
+              <Th>NCS</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {stations.map(({ Id, station, name, ncs, isEditable }) => (
+              <Tr key={Id}>
+                <Td>
+                  <Link onClick={() => toggleStationItemEditable(Id)}>
+                    {isEditable ? <CheckIcon /> : <EditIcon />}
+                  </Link>
+                </Td>
+                <Td>
+                  {isEditable ? (
+                    <Input
+                      type="text"
+                      onChange={(e) =>
+                        handleEditField(Id, "station", e.target.value)
+                      }
+                      value={station}
+                    />
+                  ) : (
+                    station
+                  )}
+                </Td>
+                <Td>
+                  {isEditable ? (
+                    <Input
+                      type="text"
+                      onChange={(e) =>
+                        handleEditField(Id, "name", e.target.value)
+                      }
+                      value={name}
+                    />
+                  ) : (
+                    name
+                  )}
+                </Td>
+                <Td>
+                  {isEditable ? (
+                    <Select
+                      value={ncs}
+                      onChange={(e) =>
+                        handleEditField(Id, "ncs", e.target.value)
+                      }
+                    >
+                      <option value="ANCS">ANCS</option>
+                      <option value="GFNCS">GFNCS</option>
+                    </Select>
+                  ) : (
+                    ncs
                   )}
                 </Td>
               </Tr>

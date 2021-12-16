@@ -13,11 +13,19 @@ const sampleData = [
     Id: "3df333dd",
     status: "APPOINTMENT",
   },
+  {
+    Id: "4df333dd",
+    status: "ON DUTY",
+  },
+  {
+    Id: "5df333dd",
+    status: "SHIFT LEAD",
+  },
 ];
 
 const dev = process.env.NODE_ENV === "development";
 
-const getPersonnelStatus = async (shift) => {
+const getPersonnelStatus = async () => {
   try {
     if (dev) return sampleData;
 
