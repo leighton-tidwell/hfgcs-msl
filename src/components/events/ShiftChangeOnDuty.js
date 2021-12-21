@@ -25,7 +25,7 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
-import { Select, Input, Textarea } from "../";
+import { Select, Input, Textarea } from "..";
 import {
   getShiftPersonnel,
   getPersonnelStatus,
@@ -36,15 +36,19 @@ import {
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
 
-const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
+const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [loading, setLoading] = useState(false);
   const [shiftMembers, setShiftMembers] = useState([]);
+  const [shopMembers, setShopMembers] = useState([]);
   const [status, setStatus] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [currentMncs, setCurrentMncs] = useState([]);
-  const [previousStationStatus, setPreviousStationStatus] = useState("");
+  const [comsecInitials, setComsecInitials] = useState({
+    operator: "",
+    all: "",
+  });
   const [formData, setFormData] = useState({
-    category: "BEGIN NU RADAY",
+    category: "SHIFT CHANGE (ON DUTY)",
     zuluDate: dayjs().format("YYYY-MM-DD"),
     time: dayjs().format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
@@ -72,6 +76,11 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
 
     const isAncsCurrent = ancsSchedule.indexOf(currentMonth.toString()) !== -1;
     setCurrentMncs(isAncsCurrent ? "ANCS" : "GFNCS");
+  };
+
+  const fetchAllMembers = async () => {
+    const allMembers = await getShiftPersonnel();
+    setShopMembers(allMembers);
   };
 
   const handleDataChange = (e) => {
@@ -112,7 +121,7 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
       if ("notOriginal" in updatedMember) return;
 
       const formattedUpdatedMember = {
-        Id: updatedMember.Id,
+        ...updatedMember,
         status: e.target.value,
       };
 
@@ -120,31 +129,15 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
     }
   };
 
-  const handleFetchPreviousStationStatus = async () => {
-    const previousStationStatus = await getActionsForDate(
-      dayjs().subtract(1, "day").format("MM/DD/YYYY")
-    );
-    const findPreviousStationStatus = previousStationStatus.find(
-      (status) => status.eventcategory === "CHKLST NOTE - 108 (END)"
-    );
-
-    if (Array.isArray(findPreviousStationStatus)) {
-      const sortByTime = findPreviousStationStatus.sort((a, b) =>
-        a.entrytime > b.entrytime ? 1 : -1
-      );
-      setPreviousStationStatus(
-        sortByTime[sortByTime.length - 1].action.split("ATT/")[1]
-      );
-      return;
-    }
-
-    setPreviousStationStatus(
-      findPreviousStationStatus?.action?.split("ATT/")[1] || ""
-    );
-  };
-
   const handleMNCSChange = (e) => {
     setCurrentMncs(e.target.value);
+  };
+
+  const handleComsecShiftInitialChange = (e) => {
+    setComsecInitials((prevInitials) => ({
+      ...prevInitials,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const addPersonnel = () => {
@@ -177,22 +170,32 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
     };
 
-    const note603 = {
+    const note101 = {
       ...formData,
-      category: "RADAY CHECKLIST - (START)",
-      action: "(U) COORDINATORS HAVE STARTED THE RADAY CHECKLIST ATT//",
+      category: "CHKLST NOTE - 101 (START)",
+      action:
+        "(U) OPERATORS HAVE STARTED THEIR SHIFT CHANGE STN OPS CHECKS ATT//",
+      zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
+    };
+
+    const note301 = {
+      ...formData,
+      category: "CHKLST NOTE - 301 (START)",
+      action:
+        "(U) COORDINATORS HAVE STARTED THE CROWS NEST SHIFT CHANGE CHECKLIST ATT//",
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
     };
 
     setFormData({
       ...formData,
-      category: "BEGIN NU RAYDAY",
+      category: "SHIFT CHANGE (ON DUTY)",
       zuluDate: dayjs().format("YYYY-MM-DD"),
       time: dayjs().format("HHmm"),
     });
 
     onSubmit(entryObj);
-    onSubmit(note603);
+    onSubmit(note101);
+    onSubmit(note301);
     setLoading(false);
     onClose();
   };
@@ -206,7 +209,7 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
     fetchShiftMembers();
     fetchStatus();
     fetchMNCSSchedule();
-    handleFetchPreviousStationStatus();
+    fetchAllMembers();
   }, []);
 
   useEffect(() => {
@@ -232,9 +235,11 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
         shiftMembersOnDuty ? shiftMembersOnDuty + "/" : ""
       } ${
         otherShiftMembers ? otherShiftMembers + "/" : ""
-      } ${currentMncs} IS MNCS/ ${previousStationStatus}`,
+      } COMSEC: OPS FLOOR: ${comsecInitials.operator} & ${
+        comsecInitials.all
+      }/ ${currentMncs} IS MNCS//`,
     }));
-  }, [shiftMembers, currentMncs, previousStationStatus]);
+  }, [shiftMembers, currentMncs, comsecInitials]);
 
   return (
     <>
@@ -244,7 +249,7 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent minW="50vw" bg="gray.900" color="white">
-          <ModalHeader>BEGIN NU RADAY</ModalHeader>
+          <ModalHeader>SHIFT CHANGE (ON DUTY)</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Stack direction="row" spacing={5}>
@@ -303,6 +308,37 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
                     <option value="ANCS">ANCS</option>
                     <option value="GFNCS">GFNCS</option>
                   </Select>
+                </FormControl>
+                <FormControl id="comsec" isRequired>
+                  <FormLabel>COMSEC</FormLabel>
+                  <Box display="flex">
+                    <Select
+                      name="operator"
+                      onChange={handleComsecShiftInitialChange}
+                      value={comsecInitials.operator}
+                      placeholder="Select an operator"
+                    >
+                      {shiftMembers
+                        .filter((e) => e.initials)
+                        .map((member) => (
+                          <option key={member.Id} value={member.initials}>
+                            {member.initials} | {member.lastname}
+                          </option>
+                        ))}
+                    </Select>
+                    <Select
+                      name="all"
+                      onChange={handleComsecShiftInitialChange}
+                      value={comsecInitials.all}
+                      placeholder="Select an operator"
+                    >
+                      {shopMembers.map((member) => (
+                        <option key={member.Id} value={member.initials}>
+                          {member.initials} | {member.lastname}
+                        </option>
+                      ))}
+                    </Select>
+                  </Box>
                 </FormControl>
                 <FormControl id="action" isRequired>
                   <FormLabel>Action/Event</FormLabel>
@@ -405,4 +441,4 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
   );
 };
 
-export default BeginNuRaday;
+export default ShiftChangeOnDuty;

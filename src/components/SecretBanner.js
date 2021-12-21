@@ -3,7 +3,14 @@ import { Box } from "@chakra-ui/react";
 
 const SecretBanner = () => {
   return (
-    <Box textAlign="center" fontWeight="700" bg="red" color="white" p={1}>
+    <Box
+      textAlign="center"
+      fontWeight="700"
+      bg="red"
+      color="white"
+      width="100%"
+      p={1}
+    >
       SECRET
     </Box>
   );

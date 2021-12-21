@@ -7,7 +7,6 @@ const ShiftSelect = ({ onClick, shiftName }) => {
 
   const fetchOperators = async () => {
     const data = await getShiftPersonnel(shiftName);
-    console.log(data);
     setOperatorList(data);
   };
 

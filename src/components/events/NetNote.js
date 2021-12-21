@@ -17,29 +17,26 @@ import {
   AlertIcon,
   AlertDescription,
   CloseButton,
-  Text,
-  Grid,
-  Box,
-  Stack,
+  HStack,
   Spinner,
 } from "@chakra-ui/react";
-import { Select, Input, Textarea, StationStatus } from "..";
-import { getShiftPersonnel, getStations, updateListItem } from "../../api";
+import { Select, Input, Textarea, RankSelect } from "..";
+import { getShiftPersonnel, getStations } from "../../api";
 import dayjs from "dayjs";
 
-const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
+const NetNote = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [error, setError] = useState("");
+  const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [shiftMembers, setShiftMembers] = useState([]);
-  const [stations, setStations] = useState([]);
-  const [toggleStations, setToggleStations] = useState("ANCS");
   const [formData, setFormData] = useState({
-    category: "CHKLST NOTE - 108 (END)",
+    category: "NET NOTE",
     zuluDate: dayjs().format("YYYY-MM-DD"),
     time: dayjs().format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
     action: "",
+    enterOrExit: "ENTERED",
   });
 
   const fetchShiftMembers = async () => {
@@ -62,27 +59,10 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
     }
     if (e.target.name === "time" && e.target.value.length > 4) return;
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [e.target.name]: e.target.value,
-    }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleStationChange = (changedStation, e, name) => {
-    const key = e?.target?.name || name;
-    const value =
-      e?.target?.value === "" || e?.target?.value ? e.target.value : e;
-
-    setStations((prevStations) =>
-      prevStations.map((station) => {
-        if (station.station === changedStation)
-          return { ...station, [key]: value };
-        return station;
-      })
-    );
-  };
-
-  const handleSave = async () => {
+  const handleSave = () => {
     setError("");
     const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
     const timeValidation = zuluTimeRegEx.test(formData.time);
@@ -101,30 +81,11 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
 
     setFormData({
       ...formData,
-      category: "CHKLST NOTE - 108 (END)",
+      category: "NET NOTE",
       zuluDate: dayjs().format("YYYY-MM-DD"),
       time: dayjs().format("HHmm"),
+      action: "",
     });
-
-    await Promise.all(
-      stations.map(async (station) => {
-        const newStation = {
-          Id: station.Id,
-          station: station.station,
-          name: station.name,
-          stratdesc: station.stratdesc,
-          stratcolor: station.stratcolor,
-          scansdesc: station.scansdesc,
-          scanscolor: station.scanscolor,
-          aledesc: station.aledesc,
-          alecolor: station.alecolor,
-          dtmfdesc: station.dtmfdesc,
-          dtmfcolor: station.dtmfcolor,
-          otherdesc: station.otherdesc,
-        };
-        await updateListItem("stations", newStation);
-      })
-    );
 
     onSubmit(entryObj);
     setLoading(false);
@@ -142,28 +103,24 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
   }, []);
 
   useEffect(() => {
-    const stationStatuses = stations.map((station) => {
-      let statusText = `${station.station}: `;
-      if (station.stratdesc !== "" && station.stratdesc !== null)
-        statusText += `STRAT: ${station.stratdesc}, `;
-      if (station.scansdesc !== "" && station.scansdesc !== null)
-        statusText += `SCANS: ${station.scansdesc}, `;
-      if (station.aledesc !== "" && station.aledesc !== null)
-        statusText += `ALE: ${station.aledesc}, `;
-      if (station.dtmfdesc !== "" && station.dtmfdesc !== null)
-        statusText += `DTMF: ${station.dtmfdesc}, `;
-      if (station.otherdesc !== "" && station.otherdesc !== null)
-        statusText += `OTHER: ${station.otherdesc} `;
-      if (statusText !== `${station.station}: `) return statusText;
-    });
-
     setFormData((prevData) => ({
       ...prevData,
-      action: `(S) OPERATORS HAVE COMPLETED THEIR 4 HOUR STN OPS CHECKS ATT/ ${stationStatuses
-        .filter((e) => e)
-        .join("/ ")} ALL OTHER STNS OPS NORMAL//`,
+      action: `(U) ${formData.aircraftCallsign || "__"} ${
+        formData.enterOrExit
+      } THE NET ATT/ ${formData.authenticatingPersonnel || "__"} @ ${
+        formData.station || "__"
+      } ZNB WITH ${formData.opChallenge || "__"} AND WAS CHALLENGED WITH ${
+        formData.acChallenge || "__"
+      }//`,
     }));
-  }, [stations]);
+  }, [
+    formData.aircraftCallsign,
+    formData.enterOrExit,
+    formData.authenticatingPersonnel,
+    formData.station,
+    formData.opChallenge,
+    formData.acChallenge,
+  ]);
 
   return (
     <>
@@ -172,12 +129,12 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent minW="95VW" bg="gray.900" color="white">
-          <ModalHeader>CHKLST NOTE - 108 (END)</ModalHeader>
+        <ModalContent bg="gray.900" minW="60rem" color="white">
+          <ModalHeader>NET NOTE</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Stack direction="row" spacing={5}>
-              <VStack flexGrow="1" spacing={4} mt={5}>
+            <HStack alignItems="flex-start" spacing={4}>
+              <VStack flexGrow="1" spacing={4}>
                 <FormControl id="event-category" isRequired>
                   <FormLabel>Event</FormLabel>
                   <Input
@@ -227,7 +184,6 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
                     name="action"
                     type="text"
                     value={formData.action}
-                    minHeight="200px"
                   />
                 </FormControl>
                 {error && (
@@ -244,36 +200,71 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
                   </Alert>
                 )}
               </VStack>
-              <Box flexGrow="1">
-                <Box display="flex" alignItems="center" mb={2}>
-                  <Text flexGrow="1" fontWeight="bold" fontSize="lg">
-                    Station Statuses
-                  </Text>
-                  <Button
-                    colorScheme="blue"
-                    onClick={() =>
-                      setToggleStations(
-                        toggleStations === "ANCS" ? "GFNCS" : "ANCS"
-                      )
-                    }
+              <VStack flexGrow="1" spacing={4}>
+                <FormControl id="aircraftCallsign" isRequired>
+                  <FormLabel>Aircraft Callsign</FormLabel>
+                  <Input
+                    onChange={handleDataChange}
+                    value={formData.aircraftCallsign}
+                    name="aircraftCallsign"
+                    type="text"
+                  />
+                </FormControl>
+                <FormControl id="enterOrExit" isRequired>
+                  <FormLabel>ENTER/EXIT</FormLabel>
+                  <Select
+                    value={formData.enterOrExit}
+                    name="enterOrExit"
+                    onChange={handleDataChange}
                   >
-                    Show {toggleStations === "ANCS" ? "GFNCS" : "ANCS"} Stations
-                  </Button>
-                </Box>
-                <Grid templateColumns="auto auto" alignItems="center" gap={3}>
-                  {stations.map(
-                    (station) =>
-                      station.ncs === toggleStations && (
-                        <StationStatus
-                          key={station.Id}
-                          handleStationChange={handleStationChange}
-                          station={station}
-                        />
-                      )
-                  )}
-                </Grid>
-              </Box>
-            </Stack>
+                    <option value="ENTERED">ENTERED</option>
+                    <option value="EXITED">EXITED</option>
+                  </Select>
+                </FormControl>
+                <FormControl id="authenticatingPersonnel" isRequired>
+                  <FormLabel>Authenticating Personnel</FormLabel>
+                  <Input
+                    onChange={handleDataChange}
+                    value={formData.authenticatingPersonnel}
+                    name="authenticatingPersonnel"
+                    type="text"
+                  />
+                </FormControl>
+                <FormControl id="station" isRequired>
+                  <FormLabel>STN</FormLabel>
+                  <Select
+                    value={formData.station}
+                    name="station"
+                    onChange={handleDataChange}
+                    placeholder="Select station"
+                  >
+                    {stations.map((station) => (
+                      <option key={station.Id} value={station.station}>
+                        {station.station}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl id="opChallenge" isRequired>
+                  <FormLabel>OP Challenge</FormLabel>
+                  <Input
+                    onChange={handleDataChange}
+                    value={formData.opChallenge}
+                    name="opChallenge"
+                    type="text"
+                  />
+                </FormControl>
+                <FormControl id="acChallenge" isRequired>
+                  <FormLabel>AC Challenge</FormLabel>
+                  <Input
+                    onChange={handleDataChange}
+                    value={formData.acChallenge}
+                    name="acChallenge"
+                    type="text"
+                  />
+                </FormControl>
+              </VStack>
+            </HStack>
           </ModalBody>
           <ModalFooter>
             <Button
@@ -295,4 +286,4 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
   );
 };
 
-export default Checklist108End;
+export default NetNote;

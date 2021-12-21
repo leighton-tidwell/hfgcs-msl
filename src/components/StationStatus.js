@@ -12,14 +12,11 @@ import { Input } from ".";
 const StationStatus = ({ station, handleStationChange }) => {
   const [formData, setFormData] = useState(station);
 
-  console.log(formData);
-
   const handleChange = (e, name) => {
     const key = e?.target?.name || name;
     const value =
       e?.target?.value === "" || e?.target?.value ? e.target.value : e;
 
-    console.log(key, value);
     setFormData((prevForm) => ({ ...prevForm, [key]: value }));
   };
 

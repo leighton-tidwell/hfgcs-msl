@@ -1,8 +1,27 @@
-import React from "react";
-import { Table, Thead, Tbody, Text, Tr, Th, Td, Box } from "@chakra-ui/react";
+import React, { useEffect, useRef } from "react";
+import {
+  Table,
+  Thead,
+  Tbody,
+  Text,
+  Tr,
+  Th,
+  Td,
+  Box,
+  Spinner,
+} from "@chakra-ui/react";
 import { EditEntryModal, EditIcon } from ".";
 
-const EntryTable = ({ entries, updateEntry, removeEntry }) => {
+const EntryTable = ({ entries, updateEntry, removeEntry, loading, ref }) => {
+  const tableRef = useRef(null);
+  const scrollToBottom = () => {
+    tableRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [entries]);
+
   return (
     <Box
       bg="#010711"
@@ -24,7 +43,20 @@ const EntryTable = ({ entries, updateEntry, removeEntry }) => {
           </Tr>
         </Thead>
         <Tbody>
-          {!entries.length && <Text>No entries found</Text>}
+          {loading && (
+            <Tr>
+              <Td colSpan="5" textAlign="center">
+                <Spinner />
+              </Td>
+            </Tr>
+          )}
+          {!entries.length && !loading && (
+            <Tr>
+              <Td colSpan="5" textAlign="center">
+                <Text fontWeight="bolder">No entries found</Text>
+              </Td>
+            </Tr>
+          )}
           {entries.map((entry) => (
             <Tr key={entry.Id}>
               <Td>
@@ -40,6 +72,7 @@ const EntryTable = ({ entries, updateEntry, removeEntry }) => {
               <Td>{entry.action}</Td>
             </Tr>
           ))}
+          <div ref={tableRef} />
         </Tbody>
       </Table>
     </Box>

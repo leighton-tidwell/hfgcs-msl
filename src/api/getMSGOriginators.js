@@ -16,13 +16,13 @@ const sampleResults = [
   {
     Id: "3ex2555e",
     name: "301 IS",
-    default: "true",
+    default: "false",
     typediff: "fox",
   },
   {
     Id: "4ex2555e",
     name: "303 IS",
-    default: "false",
+    default: "true",
     typediff: "fox",
   },
 ];

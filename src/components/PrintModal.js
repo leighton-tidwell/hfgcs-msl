@@ -201,39 +201,43 @@ const PrintModal = () => {
       });
     }
 
+    if (!eventChoices) return;
+
     if (e.target.name === "startEvent") {
-      setDocDefinition((prevDoc) => {
-        const newDoc = { ...prevDoc };
-        newDoc.content[0].table.body[2][3].text =
-          eventChoices.find((item) => item.Id === e.target.value).entrytime +
-          "Z";
-        return newDoc;
-      });
+      if (e.target.value !== "")
+        setDocDefinition((prevDoc) => {
+          const newDoc = { ...prevDoc };
+          newDoc.content[0].table.body[2][3].text =
+            eventChoices?.find((item) => item.Id == e.target.value)?.entrytime +
+            "Z";
+          return newDoc;
+        });
     }
 
     if (e.target.name === "endEvent") {
-      setDocDefinition((prevDoc) => {
-        const newDoc = { ...prevDoc };
-        newDoc.content[0].table.body[2][4].text =
-          eventChoices.find((item) => item.Id === e.target.value).entrytime +
-          "Z";
-        return newDoc;
-      });
+      if (e.target.value !== "")
+        setDocDefinition((prevDoc) => {
+          const newDoc = { ...prevDoc };
+          newDoc.content[0].table.body[2][4].text =
+            eventChoices?.find((item) => item.Id == e.target.value)?.entrytime +
+            "Z";
+          return newDoc;
+        });
     }
 
     if (e.target.name === "startEvent" || e.target.name === "endEvent") {
       const isStartEvent = e.target.name === "startEvent";
 
       const startEventIndex = isStartEvent
-        ? eventChoices.findIndex((event) => event.Id === e.target.value)
+        ? eventChoices.findIndex((event) => event.Id == e.target.value)
         : formData.startEvent
-        ? eventChoices.findIndex((event) => event.Id === formData.startEvent)
+        ? eventChoices.findIndex((event) => event.Id == formData.startEvent)
         : 0;
 
       const endEventIndex = !isStartEvent
-        ? eventChoices.findIndex((event) => event.Id === e.target.value)
+        ? eventChoices.findIndex((event) => event.Id == e.target.value)
         : formData.endEvent
-        ? eventChoices.findIndex((event) => event.Id === formData.endEvent)
+        ? eventChoices.findIndex((event) => event.Id == formData.endEvent)
         : eventChoices.length;
 
       const items =
@@ -286,12 +290,8 @@ const PrintModal = () => {
           },
         ]);
 
-        console.log("NEW DOC", newDoc);
-
         return newDoc;
       });
-
-      // const newEvents = eventChoices.
     }
 
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -306,7 +306,11 @@ const PrintModal = () => {
       dayjs(formData.date).format("MM/DD/YYYY")
     );
 
-    setEventChoices(response);
+    const sortedResponses = response.sort((a, b) =>
+      a.entrytime > b.entrytime ? 1 : -1
+    );
+
+    setEventChoices(sortedResponses);
   };
 
   useEffect(() => {
@@ -317,10 +321,6 @@ const PrintModal = () => {
       endEvent: "",
     });
   }, [formData.date]);
-
-  useEffect(() => {
-    console.log(docDefinition);
-  }, [docDefinition]);
 
   return (
     <>

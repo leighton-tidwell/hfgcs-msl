@@ -19,6 +19,7 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  Spinner,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import { Input, RankSelect, Select } from ".";
@@ -27,13 +28,16 @@ const AddSettingsModal = ({ parameters }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [values, setValues] = useState({});
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = () => {
     setError("");
+    setLoading(true);
     if (Object.values(values).includes(""))
       return setError("Please fill in all fields.");
     parameters.onSubmit(values);
     setDefaultValues();
+    setLoading(false);
     onClose();
   };
 
@@ -154,10 +158,15 @@ const AddSettingsModal = ({ parameters }) => {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={2} onClick={handleSubmit}>
-              Save
+            <Button
+              disabled={loading}
+              colorScheme="blue"
+              mr={2}
+              onClick={handleSubmit}
+            >
+              {loading ? <Spinner size="sm" /> : "Save"}
             </Button>
-            <Button colorScheme="red" onClick={onClose}>
+            <Button disabled={loading} colorScheme="red" onClick={onClose}>
               Cancel
             </Button>
           </ModalFooter>

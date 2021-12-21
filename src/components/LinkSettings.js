@@ -9,6 +9,7 @@ import {
   Th,
   Td,
   Link,
+  Spinner,
 } from "@chakra-ui/react";
 import {
   getLinks,
@@ -106,58 +107,67 @@ const LinkSettings = () => {
           <AddSettingsModal parameters={addLinkParams} />
         </Box>
       </Box>
-      <Table variant="msltable" rounded="sm">
-        <Thead>
-          <Tr>
-            <Th>EDIT</Th>
-            <Th>Name</Th>
-            <Th>Link</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {links.map((link) => (
-            <Tr key={link.Id}>
-              <Td minWidth="100px">
-                <Link onClick={() => toggleLinkItemEditable(link.Id)}>
-                  {link.isEditable ? <CheckIcon /> : <EditIcon />}
-                </Link>
-                <ConfirmModal
-                  ml={2}
-                  onConfirm={() => handleDeleteLink(link.Id)}
-                  Icon={<DeleteIcon />}
-                  message="Are you sure you want to delete this link?"
-                />
-              </Td>
-              <Td>
-                {link.isEditable ? (
-                  <Input
-                    type="text"
-                    value={link.name}
-                    onChange={(e) =>
-                      handleEditField(link.Id, "name", e.target.value)
-                    }
-                  />
-                ) : (
-                  link.name
-                )}
-              </Td>
-              <Td>
-                {link.isEditable ? (
-                  <Input
-                    type="text"
-                    value={link.link}
-                    onChange={(e) =>
-                      handleEditField(link.Id, "link", e.target.value)
-                    }
-                  />
-                ) : (
-                  link.link
-                )}
-              </Td>
+      <Box maxHeight="500px" overflowY="auto">
+        <Table variant="msltable" rounded="sm">
+          <Thead position="sticky" top="0">
+            <Tr>
+              <Th position="sticky">EDIT</Th>
+              <Th position="sticky">Name</Th>
+              <Th position="sticky">Link</Th>
             </Tr>
-          ))}
-        </Tbody>
-      </Table>
+          </Thead>
+          <Tbody>
+            {!links.length && (
+              <Tr>
+                <Td textAlign="center" colSpan="3">
+                  <Spinner />
+                </Td>
+              </Tr>
+            )}
+            {links.map((link) => (
+              <Tr key={link.Id}>
+                <Td minWidth="100px">
+                  <Link onClick={() => toggleLinkItemEditable(link.Id)}>
+                    {link.isEditable ? <CheckIcon /> : <EditIcon />}
+                  </Link>
+                  <ConfirmModal
+                    ml={2}
+                    onConfirm={() => handleDeleteLink(link.Id)}
+                    Icon={<DeleteIcon />}
+                    message="Are you sure you want to delete this link?"
+                  />
+                </Td>
+                <Td>
+                  {link.isEditable ? (
+                    <Input
+                      type="text"
+                      value={link.name}
+                      onChange={(e) =>
+                        handleEditField(link.Id, "name", e.target.value)
+                      }
+                    />
+                  ) : (
+                    link.name
+                  )}
+                </Td>
+                <Td>
+                  {link.isEditable ? (
+                    <Input
+                      type="text"
+                      value={link.link}
+                      onChange={(e) =>
+                        handleEditField(link.Id, "link", e.target.value)
+                      }
+                    />
+                  ) : (
+                    link.link
+                  )}
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Box>
     </Box>
   );
 };

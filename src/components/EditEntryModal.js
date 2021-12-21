@@ -108,8 +108,6 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
       entrydate: dayjs(entry.entrydate).format("MM/DD/YYYY"),
     };
 
-    console.log(entryObj);
-
     updateEntry(entryObj);
     onClose();
   };

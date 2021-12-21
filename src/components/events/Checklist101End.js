@@ -21,6 +21,7 @@ import {
   Grid,
   Box,
   Stack,
+  Spinner,
 } from "@chakra-ui/react";
 import { Select, Input, Textarea, StationStatus } from "../";
 import { getShiftPersonnel, getStations, updateListItem } from "../../api";
@@ -29,7 +30,7 @@ import dayjs from "dayjs";
 const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [error, setError] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const [shiftMembers, setShiftMembers] = useState([]);
   const [stations, setStations] = useState([]);
   const [toggleStations, setToggleStations] = useState("ANCS");
@@ -53,6 +54,14 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
 
   const handleDataChange = (e) => {
     setError("");
+    if (e.target.name === "time" && e.target.value.length <= 4) {
+      return setFormData((prevFormData) => ({
+        ...prevFormData,
+        [e.target.name]: e.target.value.replace(/[^0-9]/g, ""),
+      }));
+    }
+    if (e.target.name === "time" && e.target.value.length > 4) return;
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       [e.target.name]: e.target.value,
@@ -64,7 +73,6 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
     const value =
       e?.target?.value === "" || e?.target?.value ? e.target.value : e;
 
-    console.log(key, value);
     setStations((prevStations) =>
       prevStations.map((station) => {
         if (station.station === changedStation)
@@ -84,6 +92,7 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
       return setError("You must enter operator initials.");
     if (!formData.action) return setError("You must enter an action.");
     if (!formData.category) return setError("You must enter a category.");
+    setLoading(true);
 
     const entryObj = {
       ...formData,
@@ -118,11 +127,13 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
     );
 
     onSubmit(entryObj);
+    setLoading(false);
     onClose();
   };
 
   const clearError = () => {
     setError("");
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -263,11 +274,17 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
             </Stack>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="red" variant="ghost" mr={3} onClick={onClose}>
+            <Button
+              disabled={loading}
+              colorScheme="red"
+              variant="ghost"
+              mr={3}
+              onClick={onClose}
+            >
               Cancel
             </Button>
-            <Button colorScheme="blue" onClick={handleSave}>
-              Save
+            <Button disabled={loading} colorScheme="blue" onClick={handleSave}>
+              {loading ? <Spinner size="sm" /> : "Save"}
             </Button>
           </ModalFooter>
         </ModalContent>

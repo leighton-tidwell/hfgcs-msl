@@ -9,32 +9,32 @@ import {
   ModalCloseButton,
   useDisclosure,
   Button,
-  FormControl,
+  Spinner,
   FormLabel,
-  VStack,
+  GridItem,
   Alert,
   AlertTitle,
   AlertIcon,
   AlertDescription,
   CloseButton,
-  Spinner,
+  Grid,
 } from "@chakra-ui/react";
-import { Select, Input, Textarea, RankSelect } from "../";
+import { Select, Input, Textarea, StationStatus } from "..";
 import { getShiftPersonnel } from "../../api";
 import dayjs from "dayjs";
 
-const EndRaday = ({ shift, actionEntry, onSubmit }) => {
+const StnNote = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [shiftMembers, setShiftMembers] = useState([]);
   const [formData, setFormData] = useState({
-    category: "END RADAY",
+    category: "TFC NOTE - __",
     zuluDate: dayjs().format("YYYY-MM-DD"),
     time: dayjs().format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
-    shiftLeadRank: "",
     action: "",
+    activatedOrDeactivated: "ACTIVATED",
   });
 
   const fetchShiftMembers = async () => {
@@ -55,7 +55,7 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setError("");
     const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
     const timeValidation = zuluTimeRegEx.test(formData.time);
@@ -74,10 +74,11 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
 
     setFormData({
       ...formData,
-      category: "END RAYDAY",
+      category: "TFC NOTE - __",
       zuluDate: dayjs().format("YYYY-MM-DD"),
       time: dayjs().format("HHmm"),
       action: "",
+      activatedOrDeactivated: "ACTIVATED",
     });
 
     onSubmit(entryObj);
@@ -95,27 +96,23 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
   }, []);
 
   useEffect(() => {
-    if (!shiftMembers.length) return;
-
-    const shiftLeadRank =
-      shiftMembers.find((member) => member.isShiftLead === "true")?.rank || "";
-
+    const station =
+      formData.unit === "82 RS" || formData.unit === "5 EACCS" ? "JTY" : "ICZ";
     setFormData((prevData) => ({
       ...prevData,
-      shiftLeadRank,
-    }));
-  }, [shiftMembers]);
-
-  useEffect(() => {
-    setFormData((prevData) => ({
-      ...prevData,
-      action: `(U) ${formData.shiftLeadRank} __________________________ & ${shift} SHIFT OFF DUTY ATT//`,
+      category: `TFC NOTE - ${station}`,
+      action: `(U) ${prevData.unitRepInits || "__"} @ ${
+        prevData.unit || "__"
+      } ${prevData.activatedOrDeactivated || "__"} ${
+        prevData.aircraftCallsign || "__"
+      } ${prevData.trafficType || "__"} ATT//`,
     }));
   }, [
-    formData.zuluDate,
-    formData.time,
-    formData.shiftLeadRank,
-    formData.operatorInitials,
+    formData.unit,
+    formData.unitRepInits,
+    formData.activatedOrDeactivated,
+    formData.aircraftCallsign,
+    formData.trafficType,
   ]);
 
   return (
@@ -125,40 +122,48 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent bg="gray.900" color="white">
-          <ModalHeader>END RADAY</ModalHeader>
+        <ModalContent bg="gray.900" minW="50rem" color="white">
+          <ModalHeader>STATION NOTE</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <VStack spacing={4}>
-              <FormControl id="event-category" isRequired>
+            <Grid templateColumns="200px auto" flexGrow="1" gap={2}>
+              <GridItem>
                 <FormLabel>Event</FormLabel>
+              </GridItem>
+              <GridItem>
                 <Input
                   isDisabled
                   value={formData.category}
                   name="category"
                   type="text"
                 />
-              </FormControl>
-              <FormControl id="date" isRequired>
+              </GridItem>
+              <GridItem>
                 <FormLabel>Zulu Date</FormLabel>
+              </GridItem>
+              <GridItem>
                 <Input
                   onChange={handleDataChange}
                   value={formData.zuluDate}
                   name="zuluDate"
                   type="date"
                 />
-              </FormControl>
-              <FormControl id="time" isRequired>
+              </GridItem>
+              <GridItem>
                 <FormLabel>Time (Z)</FormLabel>
+              </GridItem>
+              <GridItem>
                 <Input
                   onChange={handleDataChange}
                   value={formData.time}
                   name="time"
                   type="text"
                 />
-              </FormControl>
-              <FormControl id="op-init" isRequired>
+              </GridItem>
+              <GridItem>
                 <FormLabel>Operator Initials</FormLabel>
+              </GridItem>
+              <GridItem>
                 <Select
                   value={formData.operatorInitials}
                   placeholder="Select an operator"
@@ -171,38 +176,97 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
                     </option>
                   ))}
                 </Select>
-              </FormControl>
-              <FormControl id="shift-lead-rank" isRequired>
-                <FormLabel>Shift Lead Rank</FormLabel>
-                <RankSelect
+              </GridItem>
+              <GridItem>
+                <FormLabel>Unit Rep Intials</FormLabel>
+              </GridItem>
+              <GridItem>
+                <Input
                   onChange={handleDataChange}
-                  name="shiftLeadRank"
-                  value={formData.shiftLeadRank}
+                  value={formData.unitRepInits}
+                  name="unitRepInits"
+                  type="text"
                 />
-              </FormControl>
-              <FormControl id="action" isRequired>
+              </GridItem>
+              <GridItem>
+                <FormLabel>Unit</FormLabel>
+              </GridItem>
+              <GridItem>
+                <Select
+                  value={formData.unit}
+                  name="unit"
+                  onChange={handleDataChange}
+                  placeholder="Select a Unit"
+                >
+                  <option value="82 RS">82 RS</option>
+                  <option value="5 EACCS">5 EACCS</option>
+                  <option value="21 ERS">21 ERS</option>
+                  <option value="24 ERS">24 ERS</option>
+                </Select>
+              </GridItem>
+              <GridItem>
+                <FormLabel>Activated/Deactivated</FormLabel>
+              </GridItem>
+              <GridItem>
+                <Select
+                  onChange={handleDataChange}
+                  value={formData.activatedOrDeactivated}
+                  name="activatedOrDeactivated"
+                >
+                  <option value="ACTIVATED">ACTIVATED</option>
+                  <option value="DEACTIVATED">DEACTIVATED</option>
+                </Select>
+              </GridItem>
+              <GridItem>
+                <FormLabel>Aircraft Callsign</FormLabel>
+              </GridItem>
+              <GridItem>
+                <Input
+                  onChange={handleDataChange}
+                  value={formData.aircraftCallsign}
+                  name="aircraftCallsign"
+                  type="text"
+                />
+              </GridItem>
+              <GridItem>
+                <FormLabel>Traffic Type</FormLabel>
+              </GridItem>
+              <GridItem>
+                <Select
+                  value={formData.trafficType}
+                  name="trafficType"
+                  onChange={handleDataChange}
+                  placeholder="Select a Traffic Type"
+                >
+                  <option value="MTO">MTO</option>
+                  <option value="R&A">R&A</option>
+                </Select>
+              </GridItem>
+              <GridItem>
                 <FormLabel>Action/Event</FormLabel>
+              </GridItem>
+              <GridItem>
                 <Textarea
                   onChange={handleDataChange}
                   name="action"
                   type="text"
                   value={formData.action}
                 />
-              </FormControl>
-              {error && (
-                <Alert status="error" variant="solid">
-                  <AlertIcon />
-                  <AlertTitle mr={2}>Error!</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                  <CloseButton
-                    position="absolute"
-                    onClick={clearError}
-                    right="8px"
-                    top="8px"
-                  />
-                </Alert>
-              )}
-            </VStack>
+              </GridItem>
+            </Grid>
+            {error && (
+              <Alert status="error" variant="solid">
+                <AlertIcon />
+                <AlertTitle mr={2}>Error!</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+                <CloseButton
+                  position="absolute"
+                  onClick={clearError}
+                  right="8px"
+                  top="8px"
+                />
+              </Alert>
+            )}
           </ModalBody>
           <ModalFooter>
             <Button
@@ -224,4 +288,4 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
   );
 };
 
-export default EndRaday;
+export default StnNote;

@@ -20,6 +20,7 @@ import dayjs from "dayjs";
 const MSLPage = ({ shift }) => {
   const [date, setDate] = useState(dayjs().format("MM/DD/YYYY"));
   const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [actionEntry, setActionEntry] = useState({
     category: "",
@@ -36,13 +37,14 @@ const MSLPage = ({ shift }) => {
       entrydate: entry.zuluDate,
       entrytime: entry.time,
       operatorinitials: entry.operatorInitials,
-      action: entry.action,
+      action: entry.action.toUpperCase(),
     };
 
     const response = await insertIntoList("eventlog", formattedEntry);
 
     const entryWithId = {
       ...entry,
+      action: entry.action.toUpperCase(),
       Id: response,
     };
 
@@ -92,6 +94,7 @@ const MSLPage = ({ shift }) => {
     );
 
     setEntries(sortedEntries);
+    setLoading(false);
   };
 
   const updateDate = (date) => {
@@ -140,6 +143,7 @@ const MSLPage = ({ shift }) => {
             removeEntry={removeActionEntry}
             date={date}
             entries={entries}
+            loading={loading}
           />
         </Box>
       </Box>

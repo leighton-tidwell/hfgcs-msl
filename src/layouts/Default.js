@@ -6,7 +6,7 @@ const DefaultLayout = ({ children }) => {
   return (
     <>
       <SecretBanner />
-      <Container maxW="container.xxl" p={10} height="100VH">
+      <Container maxW="container.xxl" p={10} height="calc(100VH-32px)">
         {children}
       </Container>
     </>

@@ -15,6 +15,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
+    observation: "STN FVRS",
   },
   {
     Id: "2lllee2e",
@@ -30,6 +31,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
+    observation: "STN FVRS",
   },
   {
     Id: "3lllee2e",
@@ -45,6 +47,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
+    observation: "STN FVRS",
   },
   {
     Id: "4lllee2e",
@@ -60,6 +63,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
+    observation: "STN FVRS",
   },
   {
     Id: "5lllee2e",
@@ -75,6 +79,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
+    observation: "STN FVRS",
   },
   {
     Id: "6lllee2e",
@@ -90,6 +95,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
+    observation: "STN FVRS",
   },
   {
     Id: "7lllee2e",
@@ -105,6 +111,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
+    observation: "STN FVRS",
   },
   {
     Id: "8lllee2e",
@@ -120,6 +127,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
+    observation: "STN FVRS",
   },
   {
     Id: "9lllee2e",
@@ -135,6 +143,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
+    observation: "STN FVRS",
   },
   {
     Id: "10lllee2e",
@@ -150,6 +159,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
+    observation: "STN FVRS",
   },
   {
     Id: "11lllee2e",
@@ -165,6 +175,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
+    observation: "STN FVRS",
   },
   {
     Id: "12lllee2e",
@@ -180,6 +191,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
+    observation: "STN FVRS",
   },
   {
     Id: "13lllee2e",
@@ -195,6 +207,7 @@ const sampleResults = [
     dtmfcolor: "green",
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
+    observation: "STN FVRS",
   },
 ];
 

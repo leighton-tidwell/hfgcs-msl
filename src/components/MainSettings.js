@@ -14,6 +14,7 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  Spinner,
 } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 import { EditIcon, Input, Select } from ".";
@@ -127,23 +128,26 @@ const MainSettings = () => {
     );
   };
 
-  const handleEditField = (Id, field, value) => {
+  const handleEditField = (Id, field, value, type) => {
     setError("");
-    setBroadcastingSchedule((prevSchedule) =>
-      prevSchedule.map((item) =>
-        item.Id === Id ? { ...item, [field]: value } : item
-      )
-    );
-    setMncsSchedule((prevSchedule) =>
-      prevSchedule.map((item) =>
-        item.Id === Id ? { ...item, [field]: value } : item
-      )
-    );
-    setStations((prevStations) =>
-      prevStations.map((item) =>
-        item.Id === Id ? { ...item, [field]: value } : item
-      )
-    );
+    if (type === "broadcast")
+      setBroadcastingSchedule((prevSchedule) =>
+        prevSchedule.map((item) =>
+          item.Id === Id ? { ...item, [field]: value } : item
+        )
+      );
+    if (type === "mncs")
+      setMncsSchedule((prevSchedule) =>
+        prevSchedule.map((item) =>
+          item.Id === Id ? { ...item, [field]: value } : item
+        )
+      );
+    if (type === "station")
+      setStations((prevStations) =>
+        prevStations.map((item) =>
+          item.Id === Id ? { ...item, [field]: value } : item
+        )
+      );
   };
 
   const clearError = () => {
@@ -159,9 +163,11 @@ const MainSettings = () => {
   return (
     <Box display="flex">
       <Box flexGrow="1" mr={2} display="flex" flexDir="column">
-        <Text fontWeight="bold" fontSize="lg">
-          Broadcasting NCS Schedule:
-        </Text>
+        <Box mb={3} display="flex" alignItems="center">
+          <Text fontWeight="bold" fontSize="lg" flexGrow="1">
+            Broadcasting NCS Schedule:
+          </Text>
+        </Box>
         <Table variant="msltable" rounded="sm">
           <Thead>
             <Tr>
@@ -171,6 +177,13 @@ const MainSettings = () => {
             </Tr>
           </Thead>
           <Tbody>
+            {!broadcastingSchedule.length && (
+              <Tr>
+                <Td textAlign="center" colSpan="3">
+                  <Spinner />
+                </Td>
+              </Tr>
+            )}
             {broadcastingSchedule.map(
               ({ Id, time, ncs, isEditable = false }) => (
                 <Tr key={Id}>
@@ -184,7 +197,12 @@ const MainSettings = () => {
                       <Input
                         type="text"
                         onChange={(e) =>
-                          handleEditField(Id, "time", e.target.value)
+                          handleEditField(
+                            Id,
+                            "time",
+                            e.target.value,
+                            "broadcast"
+                          )
                         }
                         isInvalid={error.match("broadcast time")}
                         value={time}
@@ -198,7 +216,12 @@ const MainSettings = () => {
                       <Input
                         type="text"
                         onChange={(e) =>
-                          handleEditField(Id, "ncs", e.target.value)
+                          handleEditField(
+                            Id,
+                            "ncs",
+                            e.target.value,
+                            "broadcast"
+                          )
                         }
                         value={ncs}
                       />
@@ -226,9 +249,11 @@ const MainSettings = () => {
         )}
       </Box>
       <Box flexGrow="1" ml={2} display="flex" flexDir="column">
-        <Text fontWeight="bold" fontSize="lg">
-          MNCS Schedule:
-        </Text>
+        <Box mb={3} display="flex" alignItems="center">
+          <Text fontWeight="bold" fontSize="lg" flexGrow="1">
+            MNCS Schedule:
+          </Text>
+        </Box>
         <Table variant="msltable" rounded="sm">
           <Thead>
             <Tr>
@@ -238,6 +263,13 @@ const MainSettings = () => {
             </Tr>
           </Thead>
           <Tbody>
+            {!mncsSchedule.length && (
+              <Tr>
+                <Td textAlign="center" colSpan="3">
+                  <Spinner />
+                </Td>
+              </Tr>
+            )}
             {mncsSchedule.map(({ Id, ncs, months, isEditable }) => (
               <Tr key={Id}>
                 <Td>
@@ -250,7 +282,7 @@ const MainSettings = () => {
                     <Input
                       type="text"
                       onChange={(e) =>
-                        handleEditField(Id, "ncs", e.target.value)
+                        handleEditField(Id, "ncs", e.target.value, "mncs")
                       }
                       value={ncs}
                     />
@@ -263,7 +295,7 @@ const MainSettings = () => {
                     <Input
                       type="text"
                       onChange={(e) =>
-                        handleEditField(Id, "months", e.target.value)
+                        handleEditField(Id, "months", e.target.value, "mncs")
                       }
                       value={months}
                     />
@@ -277,71 +309,87 @@ const MainSettings = () => {
         </Table>
       </Box>
       <Box flexGrow="1" ml={2} display="flex" flexDir="column">
-        <Text fontWeight="bold" fontSize="lg">
-          Stations:
-        </Text>
-        <Table variant="msltable" rounded="sm">
-          <Thead>
-            <Tr>
-              <Th>EDIT</Th>
-              <Th>STN</Th>
-              <Th>NAME</Th>
-              <Th>NCS</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {stations.map(({ Id, station, name, ncs, isEditable }) => (
-              <Tr key={Id}>
-                <Td>
-                  <Link onClick={() => toggleStationItemEditable(Id)}>
-                    {isEditable ? <CheckIcon /> : <EditIcon />}
-                  </Link>
-                </Td>
-                <Td>
-                  {isEditable ? (
-                    <Input
-                      type="text"
-                      onChange={(e) =>
-                        handleEditField(Id, "station", e.target.value)
-                      }
-                      value={station}
-                    />
-                  ) : (
-                    station
-                  )}
-                </Td>
-                <Td>
-                  {isEditable ? (
-                    <Input
-                      type="text"
-                      onChange={(e) =>
-                        handleEditField(Id, "name", e.target.value)
-                      }
-                      value={name}
-                    />
-                  ) : (
-                    name
-                  )}
-                </Td>
-                <Td>
-                  {isEditable ? (
-                    <Select
-                      value={ncs}
-                      onChange={(e) =>
-                        handleEditField(Id, "ncs", e.target.value)
-                      }
-                    >
-                      <option value="ANCS">ANCS</option>
-                      <option value="GFNCS">GFNCS</option>
-                    </Select>
-                  ) : (
-                    ncs
-                  )}
-                </Td>
+        <Box mb={3} display="flex" alignItems="center">
+          <Text fontWeight="bold" fontSize="lg" flexGrow="1">
+            Stations:
+          </Text>
+        </Box>
+        <Box maxHeight="500px" overflowY="auto">
+          <Table variant="msltable" rounded="sm">
+            <Thead position="sticky" top="0">
+              <Tr>
+                <Th position="sticky">EDIT</Th>
+                <Th position="sticky">STN</Th>
+                <Th position="sticky">NAME</Th>
+                <Th position="sticky">NCS</Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
+            </Thead>
+            <Tbody>
+              {!stations.length && (
+                <Tr>
+                  <Td textAlign="center" colSpan="4">
+                    <Spinner />
+                  </Td>
+                </Tr>
+              )}
+              {stations.map(({ Id, station, name, ncs, isEditable }) => (
+                <Tr key={Id + "3"}>
+                  <Td>
+                    <Link onClick={() => toggleStationItemEditable(Id)}>
+                      {isEditable ? <CheckIcon /> : <EditIcon />}
+                    </Link>
+                  </Td>
+                  <Td>
+                    {isEditable ? (
+                      <Input
+                        type="text"
+                        onChange={(e) =>
+                          handleEditField(
+                            Id,
+                            "station",
+                            e.target.value,
+                            "station"
+                          )
+                        }
+                        value={station}
+                      />
+                    ) : (
+                      station
+                    )}
+                  </Td>
+                  <Td>
+                    {isEditable ? (
+                      <Input
+                        type="text"
+                        onChange={(e) =>
+                          handleEditField(Id, "name", e.target.value, "station")
+                        }
+                        value={name}
+                      />
+                    ) : (
+                      name
+                    )}
+                  </Td>
+                  <Td>
+                    {isEditable ? (
+                      <Select
+                        value={ncs}
+                        onChange={(e) =>
+                          handleEditField(Id, "ncs", e.target.value, "station")
+                        }
+                      >
+                        <option value="ANCS">ANCS</option>
+                        <option value="GFNCS">GFNCS</option>
+                      </Select>
+                    ) : (
+                      ncs
+                    )}
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
       </Box>
     </Box>
   );

@@ -19,28 +19,24 @@ import {
   CloseButton,
   Spinner,
 } from "@chakra-ui/react";
-import { Select, Input, Textarea, RankSelect } from "../";
-import { getShiftPersonnel } from "../../api";
+import { Select, Input, Textarea } from "..";
+import { getShiftPersonnel, getRXMedians } from "../../api";
 import dayjs from "dayjs";
 
-const EndRaday = ({ shift, actionEntry, onSubmit }) => {
+const DefconStatus = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rxMedians, setRxMedians] = useState([]);
   const [shiftMembers, setShiftMembers] = useState([]);
   const [formData, setFormData] = useState({
-    category: "END RADAY",
+    category: "DEFCON STATUS",
     zuluDate: dayjs().format("YYYY-MM-DD"),
     time: dayjs().format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
-    shiftLeadRank: "",
     action: "",
+    defconLevel: "",
   });
-
-  const fetchShiftMembers = async () => {
-    const shiftMembers = await getShiftPersonnel(shift ? shift : "");
-    setShiftMembers(shiftMembers);
-  };
 
   const handleDataChange = (e) => {
     setError("");
@@ -53,6 +49,22 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
     if (e.target.name === "time" && e.target.value.length > 4) return;
 
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const fetchShiftMembers = async () => {
+    const shiftMembers = await getShiftPersonnel(shift ? shift : "");
+    setShiftMembers(shiftMembers);
+  };
+
+  const fetchRxMedians = async () => {
+    const rxMedianList = await getRXMedians("eam");
+    setRxMedians(rxMedianList);
+
+    const defaultRx = rxMedianList.find((median) => median.default === "true");
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      rxMedian: defaultRx ? defaultRx.name : "",
+    }));
   };
 
   const handleSave = () => {
@@ -74,7 +86,7 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
 
     setFormData({
       ...formData,
-      category: "END RAYDAY",
+      category: "DEFCON STATUS",
       zuluDate: dayjs().format("YYYY-MM-DD"),
       time: dayjs().format("HHmm"),
       action: "",
@@ -91,32 +103,21 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
   };
 
   useEffect(() => {
+    fetchRxMedians();
     fetchShiftMembers();
   }, []);
 
   useEffect(() => {
-    if (!shiftMembers.length) return;
-
-    const shiftLeadRank =
-      shiftMembers.find((member) => member.isShiftLead === "true")?.rank || "";
-
+    const actionText = `(S) RCVD MESSAGE VIA ${
+      formData.rxMedian
+    } INDICATING MOVEMENT TO DEFCON ${formData.defconLevel}${
+      formData.defconLevel <= 2 ? "/ WILL POLL FOR TRAFFIC @ 00Z @ 30Z" : ""
+    }//`;
     setFormData((prevData) => ({
       ...prevData,
-      shiftLeadRank,
+      action: actionText,
     }));
-  }, [shiftMembers]);
-
-  useEffect(() => {
-    setFormData((prevData) => ({
-      ...prevData,
-      action: `(U) ${formData.shiftLeadRank} __________________________ & ${shift} SHIFT OFF DUTY ATT//`,
-    }));
-  }, [
-    formData.zuluDate,
-    formData.time,
-    formData.shiftLeadRank,
-    formData.operatorInitials,
-  ]);
+  }, [formData.rxMedian, formData.defconLevel]);
 
   return (
     <>
@@ -126,7 +127,7 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent bg="gray.900" color="white">
-          <ModalHeader>END RADAY</ModalHeader>
+          <ModalHeader>DEFCON STATUS</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={4}>
@@ -172,13 +173,34 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
                   ))}
                 </Select>
               </FormControl>
-              <FormControl id="shift-lead-rank" isRequired>
-                <FormLabel>Shift Lead Rank</FormLabel>
-                <RankSelect
+              <FormControl id="rxMedian" isRequired>
+                <FormLabel>RX Median</FormLabel>
+                <Select
+                  value={formData.rxMedian}
+                  name="rxMedian"
                   onChange={handleDataChange}
-                  name="shiftLeadRank"
-                  value={formData.shiftLeadRank}
-                />
+                >
+                  {rxMedians.map((median) => (
+                    <option key={median.Id} value={median.name}>
+                      {median.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl id="defconLevel" isRequired>
+                <FormLabel>DEFCON Level</FormLabel>
+                <Select
+                  value={formData.defconLevel}
+                  name="defconLevel"
+                  placeholder="Select DEFCON Level"
+                  onChange={handleDataChange}
+                >
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </Select>
               </FormControl>
               <FormControl id="action" isRequired>
                 <FormLabel>Action/Event</FormLabel>
@@ -189,6 +211,7 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
                   value={formData.action}
                 />
               </FormControl>
+
               {error && (
                 <Alert status="error" variant="solid">
                   <AlertIcon />
@@ -224,4 +247,4 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
   );
 };
 
-export default EndRaday;
+export default DefconStatus;

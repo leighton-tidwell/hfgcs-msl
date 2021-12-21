@@ -9,6 +9,7 @@ import {
   Th,
   Td,
   Link,
+  Spinner,
 } from "@chakra-ui/react";
 import {
   getRXMedians,
@@ -95,7 +96,11 @@ const FOXSettings = () => {
   };
 
   const handleAddRxMedian = async (rxMedian) => {
-    const response = await insertIntoList("rxmedian", rxMedian);
+    const formattedMedian = {
+      ...rxMedian,
+      typediff: "fox",
+    };
+    const response = await insertIntoList("rxmedian", formattedMedian);
     const newMedian = {
       ...rxMedian,
       default: "false",
@@ -170,7 +175,11 @@ const FOXSettings = () => {
   };
 
   const handleAddMSGOriginator = async (msgOriginator) => {
-    const response = await insertIntoList("msgoriginator", msgOriginator);
+    const formattedOriginator = {
+      ...msgOriginator,
+      typediff: "fox",
+    };
+    const response = await insertIntoList("msgoriginator", formattedOriginator);
     const newOriginator = {
       ...msgOriginator,
       default: "false",
@@ -374,43 +383,52 @@ const FOXSettings = () => {
             ))}
           </Select>
         </Box>
-        <Table variant="msltable" rounded="sm">
-          <Thead>
-            <Tr>
-              <Th>EDIT</Th>
-              <Th>Name</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {rxMedians.map((median) => (
-              <Tr key={median.Id}>
-                <Td>
-                  <Link onClick={() => toggleRXItemEditable(median.Id)}>
-                    {median.isEditable ? <CheckIcon /> : <EditIcon />}
-                  </Link>
-                  <ConfirmModal
-                    ml={2}
-                    onConfirm={() => handleDeleteRxMedian(median.Id)}
-                    Icon={<DeleteIcon />}
-                    message="Are you sure you want to delete this median?"
-                  />
-                </Td>
-                <Td>
-                  {median.isEditable ? (
-                    <Input
-                      value={median.name}
-                      onChange={(e) =>
-                        handleEditField(median.Id, "name", e.target.value)
-                      }
-                    />
-                  ) : (
-                    median.name
-                  )}
-                </Td>
+        <Box maxHeight="450px" overflowY="auto">
+          <Table variant="msltable" rounded="sm">
+            <Thead position="sticky" top="0">
+              <Tr>
+                <Th position="sticky">EDIT</Th>
+                <Th position="sticky">Name</Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
+            </Thead>
+            <Tbody>
+              {!rxMedians.length && (
+                <Tr>
+                  <Td textAlign="center" colSpan="2">
+                    <Spinner />
+                  </Td>
+                </Tr>
+              )}
+              {rxMedians.map((median) => (
+                <Tr key={median.Id}>
+                  <Td>
+                    <Link onClick={() => toggleRXItemEditable(median.Id)}>
+                      {median.isEditable ? <CheckIcon /> : <EditIcon />}
+                    </Link>
+                    <ConfirmModal
+                      ml={2}
+                      onConfirm={() => handleDeleteRxMedian(median.Id)}
+                      Icon={<DeleteIcon />}
+                      message="Are you sure you want to delete this median?"
+                    />
+                  </Td>
+                  <Td>
+                    {median.isEditable ? (
+                      <Input
+                        value={median.name}
+                        onChange={(e) =>
+                          handleEditField(median.Id, "name", e.target.value)
+                        }
+                      />
+                    ) : (
+                      median.name
+                    )}
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
       </Box>
       <Box ml={2} mr={2} flexGrow="1">
         <Box mb={3} display="flex" alignItems="center">
@@ -437,43 +455,52 @@ const FOXSettings = () => {
             ))}
           </Select>
         </Box>
-        <Table variant="msltable" rounded="sm">
-          <Thead>
-            <Tr>
-              <Th>EDIT</Th>
-              <Th>Name</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {msgoriginators.map((originator) => (
-              <Tr key={originator.Id}>
-                <Td>
-                  <Link onClick={() => toggleMSGItemEditable(originator.Id)}>
-                    {originator.isEditable ? <CheckIcon /> : <EditIcon />}
-                  </Link>
-                  <ConfirmModal
-                    ml={2}
-                    onConfirm={() => handleDeleteMSGOriginator(originator.Id)}
-                    Icon={<DeleteIcon />}
-                    message="Are you sure you want to delete this originator?"
-                  />
-                </Td>
-                <Td>
-                  {originator.isEditable ? (
-                    <Input
-                      value={originator.name}
-                      onChange={(e) =>
-                        handleEditField(originator.Id, "name", e.target.value)
-                      }
-                    />
-                  ) : (
-                    originator.name
-                  )}
-                </Td>
+        <Box maxHeight="450px" overflowY="auto">
+          <Table variant="msltable" rounded="sm">
+            <Thead position="sticky" top="0">
+              <Tr>
+                <Th position="sticky">EDIT</Th>
+                <Th position="sticky">Name</Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
+            </Thead>
+            <Tbody>
+              {!msgoriginators.length && (
+                <Tr>
+                  <Td textAlign="center" colSpan="2">
+                    <Spinner />
+                  </Td>
+                </Tr>
+              )}
+              {msgoriginators.map((originator) => (
+                <Tr key={originator.Id}>
+                  <Td>
+                    <Link onClick={() => toggleMSGItemEditable(originator.Id)}>
+                      {originator.isEditable ? <CheckIcon /> : <EditIcon />}
+                    </Link>
+                    <ConfirmModal
+                      ml={2}
+                      onConfirm={() => handleDeleteMSGOriginator(originator.Id)}
+                      Icon={<DeleteIcon />}
+                      message="Are you sure you want to delete this originator?"
+                    />
+                  </Td>
+                  <Td>
+                    {originator.isEditable ? (
+                      <Input
+                        value={originator.name}
+                        onChange={(e) =>
+                          handleEditField(originator.Id, "name", e.target.value)
+                        }
+                      />
+                    ) : (
+                      originator.name
+                    )}
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
       </Box>
       <Box ml={2} flexGrow="1">
         <Box mb={3} display="flex" alignItems="center">
@@ -497,43 +524,54 @@ const FOXSettings = () => {
             ))}
           </Select>
         </Box>
-        <Table variant="msltable" rounded="sm">
-          <Thead>
-            <Tr>
-              <Th>EDIT</Th>
-              <Th>Name</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {reportingCMDs.map((cmd) => (
-              <Tr key={cmd.Id}>
-                <Td>
-                  <Link onClick={() => toggleReportingCMDItemEditable(cmd.Id)}>
-                    {cmd.isEditable ? <CheckIcon /> : <EditIcon />}
-                  </Link>
-                  <ConfirmModal
-                    ml={2}
-                    onConfirm={() => handleDeleteReportingCMD(cmd.Id)}
-                    Icon={<DeleteIcon />}
-                    message="Are you sure you want to delete this reporting command?"
-                  />
-                </Td>
-                <Td>
-                  {cmd.isEditable ? (
-                    <Input
-                      value={cmd.name}
-                      onChange={(e) =>
-                        handleEditField(cmd.Id, "name", e.target.value)
-                      }
-                    />
-                  ) : (
-                    cmd.name
-                  )}
-                </Td>
+        <Box maxHeight="450px" overflowY="auto">
+          <Table variant="msltable" rounded="sm">
+            <Thead position="sticky" top="0">
+              <Tr>
+                <Th position="sticky">EDIT</Th>
+                <Th position="sticky">Name</Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
+            </Thead>
+            <Tbody>
+              {!reportingCMDs.length && (
+                <Tr>
+                  <Td textAlign="center" colSpan="2">
+                    <Spinner />
+                  </Td>
+                </Tr>
+              )}
+              {reportingCMDs.map((cmd) => (
+                <Tr key={cmd.Id}>
+                  <Td>
+                    <Link
+                      onClick={() => toggleReportingCMDItemEditable(cmd.Id)}
+                    >
+                      {cmd.isEditable ? <CheckIcon /> : <EditIcon />}
+                    </Link>
+                    <ConfirmModal
+                      ml={2}
+                      onConfirm={() => handleDeleteReportingCMD(cmd.Id)}
+                      Icon={<DeleteIcon />}
+                      message="Are you sure you want to delete this reporting command?"
+                    />
+                  </Td>
+                  <Td>
+                    {cmd.isEditable ? (
+                      <Input
+                        value={cmd.name}
+                        onChange={(e) =>
+                          handleEditField(cmd.Id, "name", e.target.value)
+                        }
+                      />
+                    ) : (
+                      cmd.name
+                    )}
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
       </Box>
     </Box>
   );

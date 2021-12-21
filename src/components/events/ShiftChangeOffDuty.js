@@ -17,6 +17,7 @@ import {
   AlertIcon,
   AlertDescription,
   CloseButton,
+  Spinner,
 } from "@chakra-ui/react";
 import { Select, Input, Textarea, RankSelect } from "../";
 import { getShiftPersonnel } from "../../api";
@@ -25,7 +26,7 @@ import dayjs from "dayjs";
 const ShiftChangeOffDuty = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [error, setError] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const [shiftMembers, setShiftMembers] = useState([]);
   const [formData, setFormData] = useState({
     category: "SHIFT CHANGE",
@@ -43,6 +44,14 @@ const ShiftChangeOffDuty = ({ shift, actionEntry, onSubmit }) => {
 
   const handleDataChange = (e) => {
     setError("");
+    if (e.target.name === "time" && e.target.value.length <= 4) {
+      return setFormData((prevFormData) => ({
+        ...prevFormData,
+        [e.target.name]: e.target.value.replace(/[^0-9]/g, ""),
+      }));
+    }
+    if (e.target.name === "time" && e.target.value.length > 4) return;
+
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -56,6 +65,7 @@ const ShiftChangeOffDuty = ({ shift, actionEntry, onSubmit }) => {
       return setError("You must enter operator initials.");
     if (!formData.action) return setError("You must enter an action.");
     if (!formData.category) return setError("You must enter a category.");
+    setLoading(true);
 
     const entryObj = {
       ...formData,
@@ -71,11 +81,13 @@ const ShiftChangeOffDuty = ({ shift, actionEntry, onSubmit }) => {
     });
 
     onSubmit(entryObj);
+    setLoading(false);
     onClose();
   };
 
   const clearError = () => {
     setError("");
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -85,9 +97,8 @@ const ShiftChangeOffDuty = ({ shift, actionEntry, onSubmit }) => {
   useEffect(() => {
     if (!shiftMembers.length) return;
 
-    const shiftLeadRank = shiftMembers.find(
-      (member) => member.isShiftLead === "true"
-    ).rank;
+    const shiftLeadRank =
+      shiftMembers.find((member) => member.isShiftLead === "true")?.rank || "";
 
     setFormData((prevData) => ({
       ...prevData,
@@ -194,11 +205,17 @@ const ShiftChangeOffDuty = ({ shift, actionEntry, onSubmit }) => {
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="red" variant="ghost" mr={3} onClick={onClose}>
+            <Button
+              disabled={loading}
+              colorScheme="red"
+              variant="ghost"
+              mr={3}
+              onClick={onClose}
+            >
               Cancel
             </Button>
-            <Button colorScheme="blue" onClick={handleSave}>
-              Save
+            <Button disabled={loading} colorScheme="blue" onClick={handleSave}>
+              {loading ? <Spinner size="sm" /> : "Save"}
             </Button>
           </ModalFooter>
         </ModalContent>
