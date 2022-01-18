@@ -160,7 +160,7 @@ const LinkSettings = () => {
                       }
                     />
                   ) : (
-                    link.link
+                    <Link href={link.link}>{link.link}</Link>
                   )}
                 </Td>
               </Tr>

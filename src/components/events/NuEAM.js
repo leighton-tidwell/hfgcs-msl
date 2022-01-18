@@ -33,6 +33,7 @@ import {
   getRXMedians,
   getMSGOriginators,
   getReportingCMD,
+  getBroadcastingSchedule,
 } from "../../api";
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
@@ -46,6 +47,7 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
   const [rxMedians, setRxMedians] = useState([]);
   const [msgOriginators, setMsgOriginators] = useState([]);
   const [reportingCMDs, setReportingCMDs] = useState([]);
+  const [broadcastSchedule, setBroadcastSchedule] = useState([]);
   const [formData, setFormData] = useState({
     category: "NU EAM",
     zuluDate: dayjs().format("YYYY-MM-DD"),
@@ -57,7 +59,6 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
     message: "",
     txNcs: "ANCS",
   });
-  const [totalFairly, setTotalFairly] = useState(1);
   const [error, setError] = useState(null);
 
   const fetchShiftMembers = async () => {
@@ -115,6 +116,43 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
       ...prevEamData,
       reportingCMD: defaultCMD ? defaultCMD.name : "",
     }));
+  };
+
+  const fetchBroadcastingSchedule = async () => {
+    const broadcastingSchedule = await getBroadcastingSchedule();
+    const formattedBroadcastSchedule = broadcastingSchedule
+      .map((schedule) => ({
+        time: schedule.time,
+        ncs: schedule.ncs,
+        Id: schedule.Id,
+      }))
+      .sort((a, b) => (a.time > b.time ? 1 : -1));
+
+    const currentTime = dayjs().format("HHmm");
+
+    for (let i = 0; i < formattedBroadcastSchedule.length; i++) {
+      if (
+        currentTime > formattedBroadcastSchedule[i].time &&
+        currentTime < formattedBroadcastSchedule[i + 1].time
+      ) {
+        setEamData((prevEamData) => ({
+          ...prevEamData,
+          txNcs: formattedBroadcastSchedule[i].ncs,
+        }));
+        break;
+      }
+
+      if (
+        currentTime > formattedBroadcastSchedule[i].time &&
+        formattedBroadcastSchedule[i + 1] === undefined
+      ) {
+        setEamData((prevEamData) => ({
+          ...prevEamData,
+          txNcs: formattedBroadcastSchedule[i].ncs,
+        }));
+        break;
+      }
+    }
   };
 
   const handleStationObservationChange = (Id, e) => {
@@ -212,6 +250,7 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
     fetchRxMedians();
     fetchMSGOriginators();
     fetchReportingCMD();
+    fetchBroadcastingSchedule();
   }, []);
 
   useEffect(() => {

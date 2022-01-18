@@ -16,6 +16,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
     observation: "STN FVRS",
+    theater: "American Theater",
   },
   {
     Id: "2lllee2e",
@@ -32,6 +33,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
     observation: "STN FVRS",
+    theater: "Pacific Theater",
   },
   {
     Id: "3lllee2e",
@@ -48,6 +50,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
     observation: "STN FVRS",
+    theater: "European Theater",
   },
   {
     Id: "4lllee2e",
@@ -64,6 +67,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
     observation: "STN FVRS",
+    theater: "Pacific Theater",
   },
   {
     Id: "5lllee2e",
@@ -80,6 +84,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
     observation: "STN FVRS",
+    theater: "European Theater",
   },
   {
     Id: "6lllee2e",
@@ -96,6 +101,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
     observation: "STN FVRS",
+    theater: "Pacific Theater",
   },
   {
     Id: "7lllee2e",
@@ -112,6 +118,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
     observation: "STN FVRS",
+    theater: "European Theater",
   },
   {
     Id: "8lllee2e",
@@ -128,6 +135,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
     observation: "STN FVRS",
+    theater: "Pacific Theater",
   },
   {
     Id: "9lllee2e",
@@ -144,6 +152,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
     observation: "STN FVRS",
+    theater: "American Theater",
   },
   {
     Id: "10lllee2e",
@@ -160,6 +169,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
     observation: "STN FVRS",
+    theater: "Pacific Theater",
   },
   {
     Id: "11lllee2e",
@@ -176,6 +186,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "GFNCS",
     observation: "STN FVRS",
+    theater: "American Theater",
   },
   {
     Id: "12lllee2e",
@@ -192,6 +203,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
     observation: "STN FVRS",
+    theater: "European Theater",
   },
   {
     Id: "13lllee2e",
@@ -208,6 +220,7 @@ const sampleResults = [
     otherdesc: "TEST OTHER DESC",
     ncs: "ANCS",
     observation: "STN FVRS",
+    theater: "American Theater",
   },
 ];
 

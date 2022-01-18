@@ -62,17 +62,16 @@ const MainSettings = () => {
   };
 
   const toggleBroadcastItemEditable = async (Id) => {
-    const changedItem = broadcastingSchedule.find((item) => item.Id === Id);
+    const updatedBroadcastItem = broadcastingSchedule.find(
+      (item) => item.Id === Id
+    );
 
-    const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
-    const timeValidation = zuluTimeRegEx.test(changedItem.time);
-    if (!timeValidation)
-      return setError("You must enter a valid broadcast time.");
+    if (updatedBroadcastItem.isEditable) {
+      const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
+      const timeValidation = zuluTimeRegEx.test(updatedBroadcastItem.time);
+      if (!timeValidation)
+        return setError("You must enter a valid broadcast time.");
 
-    if (changedItem.isEditable) {
-      const updatedBroadcastItem = broadcastingSchedule.find(
-        (item) => item.Id === Id
-      );
       const formattedBroadcastItem = {
         Id: updatedBroadcastItem.Id,
         time: updatedBroadcastItem.time,

@@ -16,6 +16,11 @@ const sampleResults = [
     time: "1800",
     ncs: "GFNCS",
   },
+  {
+    Id: "4ee2e",
+    time: "0000",
+    ncs: "ANCS",
+  },
 ];
 
 const dev = process.env.NODE_ENV === "development";
