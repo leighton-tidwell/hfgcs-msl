@@ -22,6 +22,7 @@ import {
   EAMSettings,
   FOXSettings,
   StationStatusSettings,
+  ExportEvents,
 } from ".";
 
 const SettingsModal = () => {
@@ -46,6 +47,7 @@ const SettingsModal = () => {
                 <Tab>EB:EAM</Tab>
                 <Tab>EB:FOX</Tab>
                 <Tab>Station Status</Tab>
+                <Tab>Export Events</Tab>
               </TabList>
               <TabPanels>
                 <TabPanel>
@@ -65,6 +67,9 @@ const SettingsModal = () => {
                 </TabPanel>
                 <TabPanel>
                   <StationStatusSettings />
+                </TabPanel>
+                <TabPanel>
+                  <ExportEvents />
                 </TabPanel>
               </TabPanels>
             </Tabs>

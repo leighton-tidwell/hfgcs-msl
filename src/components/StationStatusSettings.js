@@ -87,6 +87,21 @@ const StationStatusSettings = () => {
       "",
       "",
     ]);
+
+    ancsRow.font = {
+      bold: true,
+      size: 14,
+      name: "Calibri",
+    };
+
+    ["C2", "D2", "E2", "F2", "G2", "H2", "I2", "J2", "K2", "L2"].map((key) => {
+      ws.getCell(key).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "008000" },
+      };
+    });
+
     ws.getCell("B2").fill = {
       type: "pattern",
       pattern: "solid",
@@ -110,10 +125,26 @@ const StationStatusSettings = () => {
       "",
       "",
     ]);
+
+    gfncsRow.font = {
+      bold: true,
+      size: 14,
+      name: "Calibri",
+    };
+
+    ["C3", "D3", "E3", "F3", "G3", "H3", "I3", "J3", "K3", "L3"].map((key) => {
+      ws.getCell(key).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "008000" },
+      };
+    });
+
     ws.mergeCells("C3:E3");
     ws.mergeCells("G3:H3");
     ws.mergeCells("J3:K3");
 
+    const americanTheaterStatus = { amber: 0, red: 0 };
     const americanTheaterStations = stations.filter(
       (station) => station.theater === "American Theater"
     );
@@ -124,13 +155,13 @@ const StationStatusSettings = () => {
         i === 0 ? "American\nTheater" : "",
         station.name,
         "",
+        station.scansdesc,
         "",
         "",
         "",
         "",
         "",
-        "",
-        "",
+        station.stratdesc,
       ]);
 
       row.alignment = {
@@ -142,14 +173,117 @@ const StationStatusSettings = () => {
         bold: true,
         size: 14,
         name: "Calibri",
-        color: { argb: "FFFFFF" },
       };
+
+      ws.getCell(`F${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.scanscolor === "red"
+              ? "FF0000"
+              : station.scanscolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`F${row._number}`).font = {
+        bold: false,
+        size: 10,
+        name: "Calibri",
+      };
+
+      ws.getCell(`G${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.dtmfcolor === "red"
+              ? "FF0000"
+              : station.dtmfcolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`I${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.alecolor === "red"
+              ? "FF0000"
+              : station.alecolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`J${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "008000",
+        },
+      };
+
+      ws.getCell(`L${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.stratcolor === "red"
+              ? "FF0000"
+              : station.stratcolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`L${row._number}`).font = {
+        bold: false,
+        size: 10,
+        name: "Calibri",
+      };
+
+      if (station.scanscolor === "red") {
+        ws.getCell(`D${row._number}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "FF0000",
+          },
+        };
+        americanTheaterStatus.red++;
+      } else if (
+        station.scanscolor === "amber" ||
+        station.stratcolor === "red"
+      ) {
+        ws.getCell(`D${row._number}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "FFFF00",
+          },
+        };
+        americanTheaterStatus.amber++;
+      } else {
+        ws.getCell(`D${row._number}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "008000",
+          },
+        };
+      }
 
       ws.mergeCells(`D${row._number}:E${row._number}`);
       ws.mergeCells(`G${row._number}:H${row._number}`);
       ws.mergeCells(`J${row._number}:K${row._number}`);
     });
 
+    const pacificTheaterStatus = { amber: 0, red: 0 };
     const pacificTheaterStations = stations.filter(
       (station) => station.theater === "Pacific Theater"
     );
@@ -160,13 +294,13 @@ const StationStatusSettings = () => {
         i === 0 ? "Pacific\nTheater" : "",
         station.name,
         "",
+        station.scansdesc,
         "",
         "",
         "",
         "",
         "",
-        "",
-        "",
+        station.stratdesc,
       ]);
 
       row.alignment = {
@@ -178,14 +312,117 @@ const StationStatusSettings = () => {
         bold: true,
         size: 14,
         name: "Calibri",
-        color: { argb: "FFFFFF" },
       };
+
+      ws.getCell(`F${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.scanscolor === "red"
+              ? "FF0000"
+              : station.scanscolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`F${row._number}`).font = {
+        bold: false,
+        size: 10,
+        name: "Calibri",
+      };
+
+      ws.getCell(`G${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.dtmfcolor === "red"
+              ? "FF0000"
+              : station.dtmfcolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`I${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.alecolor === "red"
+              ? "FF0000"
+              : station.alecolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`J${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "008000",
+        },
+      };
+
+      ws.getCell(`L${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.stratcolor === "red"
+              ? "FF0000"
+              : station.stratcolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`L${row._number}`).font = {
+        bold: false,
+        size: 10,
+        name: "Calibri",
+      };
+
+      if (station.scanscolor === "red") {
+        ws.getCell(`D${row._number}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "FF0000",
+          },
+        };
+        pacificTheaterStatus.red++;
+      } else if (
+        station.scanscolor === "amber" ||
+        station.stratcolor === "red"
+      ) {
+        ws.getCell(`D${row._number}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "FFFF00",
+          },
+        };
+        pacificTheaterStatus.amber++;
+      } else {
+        ws.getCell(`D${row._number}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "008000",
+          },
+        };
+      }
 
       ws.mergeCells(`D${row._number}:E${row._number}`);
       ws.mergeCells(`G${row._number}:H${row._number}`);
       ws.mergeCells(`J${row._number}:K${row._number}`);
     });
 
+    const europeanTheaterStatus = { amber: 0, red: 0 };
     const europeanTheaterStations = stations.filter(
       (station) => station.theater === "European Theater"
     );
@@ -196,13 +433,13 @@ const StationStatusSettings = () => {
         i === 0 ? "European\nTheater" : "",
         station.name,
         "",
+        station.scansdesc,
         "",
         "",
         "",
         "",
         "",
-        "",
-        "",
+        station.stratdesc,
       ]);
 
       row.alignment = {
@@ -214,13 +451,212 @@ const StationStatusSettings = () => {
         bold: true,
         size: 14,
         name: "Calibri",
-        color: { argb: "FFFFFF" },
+        // color: { argb: "FFFFFF" },
       };
+
+      ws.getCell(`F${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.scanscolor === "red"
+              ? "FF0000"
+              : station.scanscolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`F${row._number}`).font = {
+        bold: false,
+        size: 10,
+        name: "Calibri",
+      };
+
+      ws.getCell(`G${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.dtmfcolor === "red"
+              ? "FF0000"
+              : station.dtmfcolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`I${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.alecolor === "red"
+              ? "FF0000"
+              : station.alecolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`J${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "008000",
+        },
+      };
+
+      ws.getCell(`L${row._number}`).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb:
+            station.stratcolor === "red"
+              ? "FF0000"
+              : station.stratcolor === "amber"
+              ? "FFFF00"
+              : "008000",
+        },
+      };
+
+      ws.getCell(`L${row._number}`).font = {
+        bold: false,
+        size: 10,
+        name: "Calibri",
+      };
+
+      if (station.scanscolor === "red") {
+        ws.getCell(`D${row._number}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "FF0000",
+          },
+        };
+        europeanTheaterStatus.red++;
+      } else if (
+        station.scanscolor === "amber" ||
+        station.stratcolor === "red"
+      ) {
+        ws.getCell(`D${row._number}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "FFFF00",
+          },
+        };
+        europeanTheaterStatus.amber++;
+      } else {
+        ws.getCell(`D${row._number}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "008000",
+          },
+        };
+      }
 
       ws.mergeCells(`D${row._number}:E${row._number}`);
       ws.mergeCells(`G${row._number}:H${row._number}`);
       ws.mergeCells(`J${row._number}:K${row._number}`);
     });
+
+    const hfgcsStatus = { amber: 0, red: 0 };
+
+    // Determine the status of the theater
+    if (americanTheaterStatus.red >= 2 || americanTheaterStatus.amber >= 4) {
+      ws.getCell("C4").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "FF0000",
+        },
+      };
+      hfgcsStatus.red++;
+    } else if (
+      americanTheaterStatus.red === 1 ||
+      americanTheaterStatus.amber === 3
+    ) {
+      ws.getCell("C4").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "FFFF00",
+        },
+      };
+      hfgcsStatus.amber++;
+    } else {
+      ws.getCell("C4").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "008000",
+        },
+      };
+    }
+
+    if (pacificTheaterStatus.red >= 2 || pacificTheaterStatus.amber >= 4) {
+      ws.getCell("C8").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "FF0000",
+        },
+      };
+      hfgcsStatus.red++;
+    } else if (
+      pacificTheaterStatus.red === 1 ||
+      pacificTheaterStatus.amber === 3
+    ) {
+      ws.getCell("C8").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "FFFF00",
+        },
+      };
+      hfgcsStatus.amber++;
+    } else {
+      ws.getCell("C8").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "008000",
+        },
+      };
+    }
+
+    if (europeanTheaterStatus.red >= 2 || europeanTheaterStatus.amber >= 4) {
+      ws.getCell("C13").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "FF0000",
+        },
+      };
+      hfgcsStatus.red++;
+    } else if (
+      europeanTheaterStatus.red === 1 ||
+      europeanTheaterStatus.amber === 3
+    ) {
+      ws.getCell("C13").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "FFFF00",
+        },
+      };
+      hfgcsStatus.amber++;
+    } else {
+      ws.getCell("C13").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "008000",
+        },
+      };
+    }
 
     // Style HGFCS System Cells
     ws.getCell("B2").style = {
@@ -228,12 +664,49 @@ const StationStatusSettings = () => {
         textRotation: 90,
         vertical: "middle",
         horizontal: "center",
+        wrapText: true,
       },
       font: {
         size: 14,
         bold: true,
       },
     };
+
+    console.log(hfgcsStatus);
+
+    if (hfgcsStatus.amber === 2) {
+      ws.getCell("B2").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "FFFF00",
+        },
+      };
+    } else if (hfgcsStatus.amber === 3) {
+      ws.getCell("B2").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "FF0000",
+        },
+      };
+    } else if (hfgcsStatus.red >= 1) {
+      ws.getCell("B2").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "FF0000",
+        },
+      };
+    } else {
+      ws.getCell("B2").fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {
+          argb: "008000",
+        },
+      };
+    }
 
     // Add borders to all cells
     borderCells.map((key) => {
@@ -247,45 +720,44 @@ const StationStatusSettings = () => {
 
     ws.mergeCells("B2:B16"); // merge HFCS SYSTEM cells
     ws.mergeCells("C4:C7"); // merge american theater cells
-    ws.getCell("C4").style = {
-      alignment: {
-        textRotation: 90,
-        vertical: "middle",
-        horizontal: "center",
-      },
-      font: {
-        size: 14,
-        bold: true,
-      },
+    ws.getCell("C4").alignment = {
+      textRotation: 90,
+      vertical: "middle",
+      horizontal: "center",
+      wrapText: true,
     };
+    ws.getCell("C4").font = {
+      size: 14,
+      bold: true,
+    };
+
     ws.mergeCells("C8:C12"); // merge pacific theater cells
-    ws.getCell("C8").style = {
-      alignment: {
-        textRotation: 90,
-        vertical: "middle",
-        horizontal: "center",
-      },
-      font: {
-        size: 14,
-        bold: true,
-      },
+    ws.getCell("C8").alignment = {
+      textRotation: 90,
+      vertical: "middle",
+      horizontal: "center",
+      wrapText: true,
     };
+    ws.getCell("C8").font = {
+      size: 14,
+      bold: true,
+    };
+
     ws.mergeCells("C13:C16"); // merge european theater cells
-    ws.getCell("C13").style = {
-      alignment: {
-        textRotation: 90,
-        vertical: "middle",
-        horizontal: "center",
-      },
-      font: {
-        size: 14,
-        bold: true,
-      },
+    ws.getCell("C13").alignment = {
+      textRotation: 90,
+      vertical: "middle",
+      horizontal: "center",
+      wrapText: true,
+    };
+    ws.getCell("C13").font = {
+      size: 14,
+      bold: true,
     };
 
     const buf = await wb.xlsx.writeBuffer();
 
-    saveAs(new Blob([buf]), "abc.xlsx");
+    saveAs(new Blob([buf]), "HFGCSStationStatus.xlsx");
   };
 
   const fetchStations = async () => {

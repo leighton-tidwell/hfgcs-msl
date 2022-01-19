@@ -1,5 +1,6 @@
 export { default as getAction } from "./getAction";
 export { default as getActionsForDate } from "./getActionsForDate";
+export { default as getActionsForRange } from "./getActionsForRange";
 export { default as getBroadcastingSchedule } from "./getBroadcastingSchedule";
 export { default as getFormDigest } from "./getFormDigest";
 export { default as getItemTypeForListName } from "./getItemTypeForListName";

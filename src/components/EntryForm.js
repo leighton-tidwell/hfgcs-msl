@@ -399,7 +399,11 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
             placeholder="Select an event category"
           >
             {eventCategoryOptions.map((option) => (
-              <option key={option.id} value={option.name}>
+              <option
+                style={{ color: "black" }}
+                key={option.id}
+                value={option.name}
+              >
                 {option.name}
               </option>
             ))}

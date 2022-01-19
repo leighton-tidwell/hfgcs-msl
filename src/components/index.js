@@ -6,6 +6,7 @@ export { default as EditEntryModal } from "./EditEntryModal";
 export { default as EditIcon } from "./EditIcon";
 export { default as EntryForm } from "./EntryForm";
 export { default as EntryTable } from "./EntryTable";
+export { default as ExportEvents } from "./ExportEvents";
 export { default as FOXSettings } from "./FOXSettings";
 export { default as Input } from "./Input";
 export { default as LinkSettings } from "./LinkSettings";
