@@ -111,7 +111,11 @@ const PersonnelSettings = () => {
 
   const fetchPersonnel = async () => {
     const response = await getShiftPersonnel();
-    const formReadyPersonnel = response.map((item) => ({
+    const sortedPersonnel = response.sort((a, b) => {
+      return a.shift < b.shift ? 1 : -1;
+    });
+
+    const formReadyPersonnel = sortedPersonnel.map((item) => ({
       ...item,
       isEditable: false,
     }));
@@ -152,7 +156,8 @@ const PersonnelSettings = () => {
       ...shift,
       isDayShift: shift.isDayShift === "Yes" ? "true" : "false",
     };
-    const response = await insertIntoList("shift", shift);
+
+    const response = await insertIntoList("shift", formattedShift);
     const newShift = {
       ...formattedShift,
       isEditable: false,
@@ -295,7 +300,24 @@ const PersonnelSettings = () => {
             <AddSettingsModal parameters={addShiftParams} />
           </Box>
         </Box>
-        <Box maxHeight="500px" overflowY="auto">
+        <Box
+          maxHeight="500px"
+          overflowY="auto"
+          overflowX="hidden"
+          css={{
+            "&::-webkit-scrollbar": {
+              width: "12px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#2d3748",
+              borderRadius: "10px",
+              border: "2px solid #1a202c",
+            },
+          }}
+        >
           <Table variant="msltable" rounded="sm">
             <Thead position="sticky" top="0">
               <Tr>
@@ -374,7 +396,24 @@ const PersonnelSettings = () => {
             <AddSettingsModal parameters={addPersonnelParams} />
           </Box>
         </Box>
-        <Box maxHeight="500px" overflowY="auto">
+        <Box
+          maxHeight="500px"
+          overflowY="auto"
+          overflowX="hidden"
+          css={{
+            "&::-webkit-scrollbar": {
+              width: "12px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#2d3748",
+              borderRadius: "10px",
+              border: "2px solid #1a202c",
+            },
+          }}
+        >
           <Table variant="msltable" rounded="sm">
             <Thead position="sticky" top="0">
               <Tr>
@@ -515,7 +554,24 @@ const PersonnelSettings = () => {
             <AddSettingsModal parameters={addStatusParams} />
           </Box>
         </Box>
-        <Box maxHeight="500px" overflowY="auto">
+        <Box
+          maxHeight="500px"
+          overflowY="auto"
+          overflowX="hidden"
+          css={{
+            "&::-webkit-scrollbar": {
+              width: "12px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#2d3748",
+              borderRadius: "10px",
+              border: "2px solid #1a202c",
+            },
+          }}
+        >
           <Table variant="msltable" rounded="sm">
             <Thead position="sticky" top="0">
               <Tr>

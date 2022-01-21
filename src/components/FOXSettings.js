@@ -123,17 +123,15 @@ const FOXSettings = () => {
       (median) => median.default === "true"
     );
     const formattedFormerDefaultMedian = {
-      Id: formerDefaultMedian.Id,
-      name: formerDefaultMedian.name,
-      typediff: formerDefaultMedian.typediff,
+      Id: formerDefaultMedian?.Id,
+      name: formerDefaultMedian?.name,
+      typediff: formerDefaultMedian?.typediff,
       default: "false",
     };
 
     const response = await updateListItem("rxmedian", formattedMedian);
-    const formerDefaultMedianResponse = await updateListItem(
-      "rxmedian",
-      formattedFormerDefaultMedian
-    );
+    if (formerDefaultMedian !== undefined)
+      await updateListItem("rxmedian", formattedFormerDefaultMedian);
 
     setRxMedians((prevMedians) =>
       prevMedians.map((median) =>
@@ -204,17 +202,15 @@ const FOXSettings = () => {
       (originator) => originator.default === "true"
     );
     const formattedFormerDefaultOriginator = {
-      Id: formerDefaultOriginator.Id,
-      name: formerDefaultOriginator.name,
+      Id: formerDefaultOriginator?.Id,
+      name: formerDefaultOriginator?.name,
       default: "false",
-      typediff: formerDefaultOriginator.typediff,
+      typediff: formerDefaultOriginator?.typediff,
     };
 
     const response = await updateListItem("msgoriginator", formattedOriginator);
-    const formerDefaultOriginatorResponse = await updateListItem(
-      "msgoriginator",
-      formattedFormerDefaultOriginator
-    );
+    if (formerDefaultOriginator !== undefined)
+      await updateListItem("msgoriginator", formattedFormerDefaultOriginator);
 
     setMsgoriginators((prevOriginators) =>
       prevOriginators.map((originator) =>
@@ -246,8 +242,8 @@ const FOXSettings = () => {
       (reportingCMD) => reportingCMD.default === "true"
     );
     const formattedFormerDefaultReportingCMD = {
-      Id: formerDefaultReportingCMD.Id,
-      name: formerDefaultReportingCMD.name,
+      Id: formerDefaultReportingCMD?.Id,
+      name: formerDefaultReportingCMD?.name,
       default: "false",
     };
 
@@ -255,10 +251,8 @@ const FOXSettings = () => {
       "reportingcmd",
       formattedReportingCMD
     );
-    const formerDefaultReportingCMDResponse = await updateListItem(
-      "reportingcmd",
-      formattedFormerDefaultReportingCMD
-    );
+    if (formattedFormerDefaultReportingCMD !== undefined)
+      await updateListItem("reportingcmd", formattedFormerDefaultReportingCMD);
 
     setReportingCMDs((prevReportingCMDs) =>
       prevReportingCMDs.map((reportingCMD) =>
@@ -383,7 +377,24 @@ const FOXSettings = () => {
             ))}
           </Select>
         </Box>
-        <Box maxHeight="450px" overflowY="auto">
+        <Box
+          maxHeight="450px"
+          overflowY="auto"
+          overflowX="hidden"
+          css={{
+            "&::-webkit-scrollbar": {
+              width: "12px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#2d3748",
+              borderRadius: "10px",
+              border: "2px solid #1a202c",
+            },
+          }}
+        >
           <Table variant="msltable" rounded="sm">
             <Thead position="sticky" top="0">
               <Tr>
@@ -455,7 +466,24 @@ const FOXSettings = () => {
             ))}
           </Select>
         </Box>
-        <Box maxHeight="450px" overflowY="auto">
+        <Box
+          maxHeight="450px"
+          overflowY="auto"
+          overflowX="hidden"
+          css={{
+            "&::-webkit-scrollbar": {
+              width: "12px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#2d3748",
+              borderRadius: "10px",
+              border: "2px solid #1a202c",
+            },
+          }}
+        >
           <Table variant="msltable" rounded="sm">
             <Thead position="sticky" top="0">
               <Tr>
@@ -524,7 +552,24 @@ const FOXSettings = () => {
             ))}
           </Select>
         </Box>
-        <Box maxHeight="450px" overflowY="auto">
+        <Box
+          maxHeight="450px"
+          overflowY="auto"
+          overflowX="hidden"
+          css={{
+            "&::-webkit-scrollbar": {
+              width: "12px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#2d3748",
+              borderRadius: "10px",
+              border: "2px solid #1a202c",
+            },
+          }}
+        >
           <Table variant="msltable" rounded="sm">
             <Thead position="sticky" top="0">
               <Tr>

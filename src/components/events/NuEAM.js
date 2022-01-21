@@ -50,8 +50,8 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
   const [broadcastSchedule, setBroadcastSchedule] = useState([]);
   const [formData, setFormData] = useState({
     category: "NU EAM",
-    zuluDate: dayjs().format("YYYY-MM-DD"),
-    time: dayjs().format("HHmm"),
+    zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
@@ -213,13 +213,6 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
     };
 
-    setFormData({
-      ...formData,
-      category: "NU EAM",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
-    });
-
     Promise.all(
       stations.map(async (station) => {
         const newStation = {
@@ -233,7 +226,15 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
       })
     );
 
-    onSubmit(entryObj);
+    await onSubmit(entryObj);
+
+    setFormData({
+      ...formData,
+      category: "NU EAM",
+      zuluDate: dayjs().format("YYYY-MM-DD"),
+      time: dayjs().format("HHmm"),
+    });
+
     setLoading(false);
     onClose();
   };
@@ -279,6 +280,15 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
       } @ GFNCS CONFIRMS THE FOLLOWING: ${stnfvrString}//`,
     }));
   }, [eamData, stations]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+      operatorInitials: actionEntry.operatorInitials,
+    });
+  }, [actionEntry]);
 
   return (
     <>

@@ -31,8 +31,8 @@ const DefconStatus = ({ shift, actionEntry, onSubmit }) => {
   const [shiftMembers, setShiftMembers] = useState([]);
   const [formData, setFormData] = useState({
     category: "DEFCON STATUS",
-    zuluDate: dayjs().format("YYYY-MM-DD"),
-    time: dayjs().format("HHmm"),
+    zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
     action: "",
     defconLevel: "",
@@ -67,7 +67,7 @@ const DefconStatus = ({ shift, actionEntry, onSubmit }) => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setError("");
     const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
     const timeValidation = zuluTimeRegEx.test(formData.time);
@@ -84,6 +84,8 @@ const DefconStatus = ({ shift, actionEntry, onSubmit }) => {
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
     };
 
+    await onSubmit(entryObj);
+
     setFormData({
       ...formData,
       category: "DEFCON STATUS",
@@ -92,7 +94,6 @@ const DefconStatus = ({ shift, actionEntry, onSubmit }) => {
       action: "",
     });
 
-    onSubmit(entryObj);
     setLoading(false);
     onClose();
   };
@@ -118,6 +119,15 @@ const DefconStatus = ({ shift, actionEntry, onSubmit }) => {
       action: actionText,
     }));
   }, [formData.rxMedian, formData.defconLevel]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+      operatorInitials: actionEntry.operatorInitials,
+    });
+  }, [actionEntry]);
 
   return (
     <>

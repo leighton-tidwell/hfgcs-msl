@@ -30,12 +30,12 @@ const AddSettingsModal = ({ parameters }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setError("");
-    setLoading(true);
     if (Object.values(values).includes(""))
       return setError("Please fill in all fields.");
-    parameters.onSubmit(values);
+    setLoading(true);
+    await parameters.onSubmit(values);
     setDefaultValues();
     setLoading(false);
     onClose();

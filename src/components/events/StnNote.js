@@ -34,8 +34,8 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
   const [shiftMembers, setShiftMembers] = useState([]);
   const [formData, setFormData] = useState({
     category: "STN NOTE - __",
-    zuluDate: dayjs().format("YYYY-MM-DD"),
-    time: dayjs().format("HHmm"),
+    zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
@@ -110,6 +110,8 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
     };
     await updateListItem("stations", newStation);
 
+    await onSubmit(entryObj);
+
     setFormData({
       ...formData,
       category: "STN NOTE - __",
@@ -118,7 +120,6 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
       action: "",
     });
 
-    onSubmit(entryObj);
     setLoading(false);
     onClose();
   };
@@ -151,6 +152,15 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
     formData.timeNotified,
     formData.operatorInitials,
   ]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+      operatorInitials: actionEntry.operatorInitials,
+    });
+  }, [actionEntry]);
 
   return (
     <>

@@ -28,6 +28,11 @@ const Select = ({
       _focus={{
         background: "gray.700",
       }}
+      sx={{
+        "& option": {
+          color: "gray.700",
+        },
+      }}
     >
       {children}
     </ChakraSelect>

@@ -76,17 +76,83 @@ const getActionsForRange = async (startDate, endDate) => {
         (result) => result.entrydate <= endDate && result.entrydate >= startDate
       );
 
-    const data = await axios.get(
-      `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate le '${endDate}' and entrydate ge '${startDate}'`,
-      {
-        headers: {
-          Accept: "application/json; odata=verbose",
-        },
-        withCredentials: true,
-      }
-    );
+    const startDateObject = dayjs(startDate);
+    let cloneStartDateObject = dayjs(startDate);
+    const endDateObject = dayjs(endDate);
 
-    const results = data.data.d.results;
+    let results = [];
+    if (startDateObject.month() !== endDateObject.month()) {
+      while (true) {
+        let data;
+        let breakOut = false;
+        if (startDateObject === cloneStartDateObject) {
+          const startCloneObject = cloneStartDateObject.format("MM/DD/YYYY");
+          const endOfMonth = cloneStartDateObject
+            .endOf("month")
+            .format("MM/DD/YYYY");
+
+          data = await axios.get(
+            `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate ge '${startCloneObject}' and entrydate le '${endOfMonth}'`,
+            {
+              headers: {
+                Accept: "application/json; odata=verbose",
+              },
+              withCredentials: true,
+            }
+          );
+        } else if (endDateObject.month() === cloneStartDateObject.month()) {
+          const startOfMonth = cloneStartDateObject
+            .startOf("month")
+            .format("MM/DD/YYYY");
+
+          data = await axios.get(
+            `${
+              process.env.REACT_APP_API
+            }/web/lists/getbytitle('eventlog')/items?$filter=entrydate ge '${startOfMonth}' and entrydate le '${endDateObject.format(
+              "MM/DD/YYYY"
+            )}'`,
+            {
+              headers: {
+                Accept: "application/json; odata=verbose",
+              },
+              withCredentials: true,
+            }
+          );
+          breakOut = true;
+        } else {
+          const startOfMonth = cloneStartDateObject
+            .startOf("month")
+            .format("MM/DD/YYYY");
+          const endOfMonth = cloneStartDateObject
+            .endOf("month")
+            .format("MM/DD/YYYY");
+
+          data = await axios.get(
+            `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate ge '${startOfMonth}' and entrydate le '${endOfMonth}'`,
+            {
+              headers: {
+                Accept: "application/json; odata=verbose",
+              },
+              withCredentials: true,
+            }
+          );
+        }
+        results = results.concat(data.data.d.results);
+        if (breakOut) break;
+        cloneStartDateObject = cloneStartDateObject.add(1, "month");
+      }
+    } else {
+      const data = await axios.get(
+        `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate le '${endDate}' and entrydate ge '${startDate}'`,
+        {
+          headers: {
+            Accept: "application/json; odata=verbose",
+          },
+          withCredentials: true,
+        }
+      );
+      results = data.data.d.results;
+    }
 
     return results;
   } catch (error) {

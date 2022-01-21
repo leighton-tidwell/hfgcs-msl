@@ -36,8 +36,8 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
   const [toggleStations, setToggleStations] = useState("ANCS");
   const [formData, setFormData] = useState({
     category: "CHKLST NOTE - 101 (END)",
-    zuluDate: dayjs().format("YYYY-MM-DD"),
-    time: dayjs().format("HHmm"),
+    zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
@@ -99,13 +99,6 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
     };
 
-    setFormData({
-      ...formData,
-      category: "CHKLST NOTE - 101 (END)",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
-    });
-
     await Promise.all(
       stations.map(async (station) => {
         const newStation = {
@@ -126,7 +119,15 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
       })
     );
 
-    onSubmit(entryObj);
+    await onSubmit(entryObj);
+
+    setFormData({
+      ...formData,
+      category: "CHKLST NOTE - 101 (END)",
+      zuluDate: dayjs().format("YYYY-MM-DD"),
+      time: dayjs().format("HHmm"),
+    });
+
     setLoading(false);
     onClose();
   };
@@ -144,13 +145,15 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
   useEffect(() => {
     const stationStatuses = stations.map((station) => {
       let statusText = `${station.station}: `;
-      if (station.stratdesc !== "")
+      if (station.stratdesc !== "" && station.stratdesc !== null)
         statusText += `STRAT: ${station.stratdesc}, `;
-      if (station.scansdesc !== "")
+      if (station.scansdesc !== "" && station.scansdesc !== null)
         statusText += `SCANS: ${station.scansdesc}, `;
-      if (station.aledesc !== "") statusText += `ALE: ${station.aledesc}, `;
-      if (station.dtmfdesc !== "") statusText += `DTMF: ${station.dtmfdesc}, `;
-      if (station.otherdesc !== "")
+      if (station.aledesc !== "" && station.aledesc !== null)
+        statusText += `ALE: ${station.aledesc}, `;
+      if (station.dtmfdesc !== "" && station.dtmfdesc !== null)
+        statusText += `DTMF: ${station.dtmfdesc}, `;
+      if (station.otherdesc !== "" && station.otherdesc !== null)
         statusText += `OTHER: ${station.otherdesc} `;
       if (statusText !== `${station.station}: `) return statusText;
     });
@@ -162,6 +165,15 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
         .join("/ ")} ALL OTHER STNS OPS NORMAL//`,
     }));
   }, [stations]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+      operatorInitials: actionEntry.operatorInitials,
+    });
+  }, [actionEntry]);
 
   return (
     <>

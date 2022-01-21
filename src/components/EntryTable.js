@@ -26,9 +26,23 @@ const EntryTable = ({ entries, updateEntry, removeEntry, loading, ref }) => {
     <Box
       bg="#010711"
       color="white"
-      maxHeight="100%"
+      maxHeight="80vh"
       overflowY="auto"
       rounded="sm"
+      overflowX="hidden"
+      css={{
+        "&::-webkit-scrollbar": {
+          width: "12px",
+        },
+        "&::-webkit-scrollbar-track": {
+          background: "transparent",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "#2d3748",
+          borderRadius: "10px",
+          border: "2px solid #1a202c",
+        },
+      }}
     >
       <Table variant="msltable" rounded="sm">
         <Thead position="sticky" top="0">

@@ -38,9 +38,6 @@ const ExportEvents = () => {
         return a.entrytime > b.entrytime ? 1 : -1;
     });
 
-    console.log(sortedEvents);
-    console.log(sortedByTime);
-
     const wb = new ExcelJS.Workbook();
 
     const ws = wb.addWorksheet();
@@ -73,7 +70,12 @@ const ExportEvents = () => {
 
     const buf = await wb.xlsx.writeBuffer();
 
-    saveAs(new Blob([buf]), `${startDate}-${endDate}-event-report.xlsx`);
+    saveAs(
+      new Blob([buf]),
+      `${dayjs(startDate).format("DD")}-${dayjs(endDate)
+        .format("DD MMM")
+        .toUpperCase()} MSL.xlsx`
+    );
   };
 
   return (

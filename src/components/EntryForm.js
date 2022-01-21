@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   GridItem,
@@ -331,7 +331,7 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setError("");
     const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
     const timeValidation = zuluTimeRegEx.test(actionEntry.time);
@@ -349,6 +349,8 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
       zuluDate: dayjs(actionEntry.zuluDate).format("MM/DD/YYYY"),
     };
 
+    await onSubmit(entryObj);
+
     setActionEntry({
       ...actionEntry,
       category: "",
@@ -356,7 +358,7 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
       time: dayjs().format("HHmm"),
       action: "",
     });
-    onSubmit(entryObj);
+
     setLoading(false);
   };
 
@@ -384,6 +386,11 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
       time: dayjs().format("HHmm"),
     }));
   };
+
+  useEffect(() => {
+    setActionEntry(actionEntry);
+    if (actionEntry.category === "") setFormBuilder(null);
+  }, [actionEntry]);
 
   return (
     <Box mt={10} bg="gray.800" p={10} color="white" rounded="sm">

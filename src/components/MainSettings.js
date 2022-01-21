@@ -313,7 +313,24 @@ const MainSettings = () => {
             Stations:
           </Text>
         </Box>
-        <Box maxHeight="500px" overflowY="auto">
+        <Box
+          maxHeight="500px"
+          overflowY="auto"
+          overflowX="hidden"
+          css={{
+            "&::-webkit-scrollbar": {
+              width: "12px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#2d3748",
+              borderRadius: "10px",
+              border: "2px solid #1a202c",
+            },
+          }}
+        >
           <Table variant="msltable" rounded="sm">
             <Thead position="sticky" top="0">
               <Tr>

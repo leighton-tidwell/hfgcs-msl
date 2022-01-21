@@ -30,8 +30,8 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
   const [shiftMembers, setShiftMembers] = useState([]);
   const [formData, setFormData] = useState({
     category: "END RADAY",
-    zuluDate: dayjs().format("YYYY-MM-DD"),
-    time: dayjs().format("HHmm"),
+    zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
     shiftLeadRank: "",
     action: "",
@@ -55,7 +55,7 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setError("");
     const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
     const timeValidation = zuluTimeRegEx.test(formData.time);
@@ -72,6 +72,8 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
     };
 
+    await onSubmit(entryObj);
+
     setFormData({
       ...formData,
       category: "END RAYDAY",
@@ -80,7 +82,6 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
       action: "",
     });
 
-    onSubmit(entryObj);
     setLoading(false);
     onClose();
   };
@@ -117,6 +118,15 @@ const EndRaday = ({ shift, actionEntry, onSubmit }) => {
     formData.shiftLeadRank,
     formData.operatorInitials,
   ]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+      operatorInitials: actionEntry.operatorInitials,
+    });
+  }, [actionEntry]);
 
   return (
     <>

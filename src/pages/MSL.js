@@ -8,7 +8,7 @@ import {
   PrintModal,
   DatePicker,
 } from "../components";
-import { Box } from "@chakra-ui/react";
+import { Box, useToast } from "@chakra-ui/react";
 import {
   insertIntoList,
   getActionsForDate,
@@ -21,6 +21,7 @@ const MSLPage = ({ shift }) => {
   const [date, setDate] = useState(dayjs().format("MM/DD/YYYY"));
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   const [actionEntry, setActionEntry] = useState({
     category: "",
@@ -40,18 +41,40 @@ const MSLPage = ({ shift }) => {
       action: entry.action.toUpperCase(),
     };
 
-    const response = await insertIntoList("eventlog", formattedEntry);
+    try {
+      const response = await insertIntoList("eventlog", formattedEntry);
 
-    const entryWithId = {
-      ...entry,
-      action: entry.action.toUpperCase(),
-      Id: response,
-    };
+      const entryWithId = {
+        ...entry,
+        action: entry.action.toUpperCase(),
+        Id: response,
+      };
 
-    if (entry.zuluDate === date)
-      setEntries((prevEntries) =>
-        [...prevEntries, entryWithId].sort((a, b) => (a.time > b.time ? 1 : -1))
-      );
+      if (entry.zuluDate === date)
+        setEntries((prevEntries) =>
+          [...prevEntries, entryWithId].sort((a, b) =>
+            a.time > b.time ? 1 : -1
+          )
+        );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+      });
+
+      return false;
+    }
+
+    setActionEntry((prevEntry) => ({
+      ...prevEntry,
+      category: "",
+      zuluDate: dayjs().format("YYYY-MM-DD"),
+      time: dayjs().format("HHmm"),
+      action: "",
+    }));
+
+    return true;
   };
 
   const updateActionEntry = async (entry) => {
@@ -79,6 +102,8 @@ const MSLPage = ({ shift }) => {
   };
 
   const fetchEntries = async () => {
+    setEntries([]);
+    setLoading(true);
     const entries = await getActionsForDate(date);
     const formattedEntries = entries.map((entry) => ({
       category: entry.eventcategory,

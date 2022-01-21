@@ -45,8 +45,8 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
   const [previousStationStatus, setPreviousStationStatus] = useState("");
   const [formData, setFormData] = useState({
     category: "BEGIN NU RADAY",
-    zuluDate: dayjs().format("YYYY-MM-DD"),
-    time: dayjs().format("HHmm"),
+    zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
@@ -182,7 +182,11 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
       category: "RADAY CHECKLIST - (START)",
       action: "(U) COORDINATORS HAVE STARTED THE RADAY CHECKLIST ATT//",
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
+      time: dayjs(formData.time, "HHmm").add(1, "minute").format("HHmm"),
     };
+
+    await onSubmit(entryObj);
+    await onSubmit(note603);
 
     setFormData({
       ...formData,
@@ -191,8 +195,6 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
       time: dayjs().format("HHmm"),
     });
 
-    onSubmit(entryObj);
-    onSubmit(note603);
     setLoading(false);
     onClose();
   };
@@ -235,6 +237,15 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
       } ${currentMncs} IS MNCS/ ${previousStationStatus}`,
     }));
   }, [shiftMembers, currentMncs, previousStationStatus]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+      operatorInitials: actionEntry.operatorInitials,
+    });
+  }, [actionEntry]);
 
   return (
     <>

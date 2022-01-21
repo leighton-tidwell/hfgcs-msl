@@ -36,8 +36,8 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
   const [toggleStations, setToggleStations] = useState("ANCS");
   const [formData, setFormData] = useState({
     category: "CHKLST NOTE - 108 (END)",
-    zuluDate: dayjs().format("YYYY-MM-DD"),
-    time: dayjs().format("HHmm"),
+    zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
@@ -99,13 +99,6 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
     };
 
-    setFormData({
-      ...formData,
-      category: "CHKLST NOTE - 108 (END)",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
-    });
-
     await Promise.all(
       stations.map(async (station) => {
         const newStation = {
@@ -126,7 +119,15 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
       })
     );
 
-    onSubmit(entryObj);
+    await onSubmit(entryObj);
+
+    setFormData({
+      ...formData,
+      category: "CHKLST NOTE - 108 (END)",
+      zuluDate: dayjs().format("YYYY-MM-DD"),
+      time: dayjs().format("HHmm"),
+    });
+
     setLoading(false);
     onClose();
   };
@@ -164,6 +165,15 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
         .join("/ ")} ALL OTHER STNS OPS NORMAL//`,
     }));
   }, [stations]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+      operatorInitials: actionEntry.operatorInitials,
+    });
+  }, [actionEntry]);
 
   return (
     <>

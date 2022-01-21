@@ -32,8 +32,8 @@ const NetNote = ({ shift, actionEntry, onSubmit }) => {
   const [shiftMembers, setShiftMembers] = useState([]);
   const [formData, setFormData] = useState({
     category: "NET NOTE",
-    zuluDate: dayjs().format("YYYY-MM-DD"),
-    time: dayjs().format("HHmm"),
+    zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
     action: "",
     enterOrExit: "ENTERED",
@@ -62,7 +62,7 @@ const NetNote = ({ shift, actionEntry, onSubmit }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setError("");
     const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
     const timeValidation = zuluTimeRegEx.test(formData.time);
@@ -79,6 +79,8 @@ const NetNote = ({ shift, actionEntry, onSubmit }) => {
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
     };
 
+    await onSubmit(entryObj);
+
     setFormData({
       ...formData,
       category: "NET NOTE",
@@ -87,7 +89,6 @@ const NetNote = ({ shift, actionEntry, onSubmit }) => {
       action: "",
     });
 
-    onSubmit(entryObj);
     setLoading(false);
     onClose();
   };
@@ -121,6 +122,15 @@ const NetNote = ({ shift, actionEntry, onSubmit }) => {
     formData.opChallenge,
     formData.acChallenge,
   ]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+      operatorInitials: actionEntry.operatorInitials,
+    });
+  }, [actionEntry]);
 
   return (
     <>

@@ -31,7 +31,6 @@ import {
   getPersonnelStatus,
   getMNCSSchedule,
   updateListItem,
-  getActionsForDate,
 } from "../../api";
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
@@ -49,8 +48,8 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
   });
   const [formData, setFormData] = useState({
     category: "SHIFT CHANGE (ON DUTY)",
-    zuluDate: dayjs().format("YYYY-MM-DD"),
-    time: dayjs().format("HHmm"),
+    zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
@@ -186,6 +185,10 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
     };
 
+    await onSubmit(entryObj);
+    await onSubmit(note101);
+    await onSubmit(note301);
+
     setFormData({
       ...formData,
       category: "SHIFT CHANGE (ON DUTY)",
@@ -193,9 +196,6 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
       time: dayjs().format("HHmm"),
     });
 
-    onSubmit(entryObj);
-    onSubmit(note101);
-    onSubmit(note301);
     setLoading(false);
     onClose();
   };
@@ -240,6 +240,15 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
       }/ ${currentMncs} IS MNCS//`,
     }));
   }, [shiftMembers, currentMncs, comsecInitials]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
+      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+      operatorInitials: actionEntry.operatorInitials,
+    });
+  }, [actionEntry]);
 
   return (
     <>
