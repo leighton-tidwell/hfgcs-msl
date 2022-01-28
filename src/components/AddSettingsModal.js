@@ -20,12 +20,14 @@ import {
   AlertTitle,
   AlertDescription,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import { Input, RankSelect, Select } from ".";
 
 const AddSettingsModal = ({ parameters }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [values, setValues] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,8 +36,18 @@ const AddSettingsModal = ({ parameters }) => {
     setError("");
     if (Object.values(values).includes(""))
       return setError("Please fill in all fields.");
-    setLoading(true);
-    await parameters.onSubmit(values);
+
+    try {
+      setLoading(true);
+      await parameters.onSubmit(values);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
     setDefaultValues();
     setLoading(false);
     onClose();

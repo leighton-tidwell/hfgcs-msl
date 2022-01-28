@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Text, Button } from "@chakra-ui/react";
+import { Box, Text, Button, useToast, Spinner } from "@chakra-ui/react";
 import ExcelJS from "exceljs/dist/es5/exceljs.browser.js";
 import { saveAs } from "file-saver";
 import { getStations } from "../api";
@@ -7,8 +7,11 @@ import { borderCells } from "./cellData";
 
 const StationStatusSettings = () => {
   const [stations, setStations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleDownload = async () => {
+    setLoading(true);
     const wb = new ExcelJS.Workbook();
 
     const ws = wb.addWorksheet();
@@ -757,12 +760,23 @@ const StationStatusSettings = () => {
 
     const buf = await wb.xlsx.writeBuffer();
 
+    setLoading(false);
+
     saveAs(new Blob([buf]), "HFGCSStationStatus.xlsx");
   };
 
   const fetchStations = async () => {
-    const data = await getStations();
-    setStations(data);
+    try {
+      const data = await getStations();
+      setStations(data);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   useEffect(() => {
@@ -782,8 +796,9 @@ const StationStatusSettings = () => {
           colorScheme="blue"
           width="300px"
           mr={2}
+          isDisabled={loading}
         >
-          Download Station Status
+          {loading ? <Spinner /> : "Download Station Status"}
         </Button>
       </Box>
     </Box>

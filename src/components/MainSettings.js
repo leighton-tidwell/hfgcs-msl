@@ -15,6 +15,7 @@ import {
   AlertTitle,
   AlertDescription,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 import { EditIcon, Input, Select } from ".";
@@ -30,101 +31,159 @@ const MainSettings = () => {
   const [mncsSchedule, setMncsSchedule] = useState([]);
   const [stations, setStations] = useState([]);
   const [error, setError] = useState("");
+  const toast = useToast();
 
   const fetchBroadcastingSchedule = async () => {
-    const response = await getBroadcastingSchedule();
-    const formReadySchedule = response.map((item) => ({
-      ...item,
-      isEditable: false,
-    }));
+    try {
+      const response = await getBroadcastingSchedule();
+      const formReadySchedule = response.map((item) => ({
+        ...item,
+        isEditable: false,
+      }));
 
-    setBroadcastingSchedule(formReadySchedule);
+      setBroadcastingSchedule(formReadySchedule);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchMNCSSchedule = async () => {
-    const response = await getMNCSSchedule();
-    const formReadySchedule = response.map((item) => ({
-      ...item,
-      isEditable: false,
-    }));
+    try {
+      const response = await getMNCSSchedule();
+      const formReadySchedule = response.map((item) => ({
+        ...item,
+        isEditable: false,
+      }));
 
-    setMncsSchedule(formReadySchedule);
+      setMncsSchedule(formReadySchedule);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchStations = async () => {
-    const response = await getStations();
-    const formReadyStations = response.map((item) => ({
-      ...item,
-      isEditable: false,
-    }));
+    try {
+      const response = await getStations();
+      const formReadyStations = response.map((item) => ({
+        ...item,
+        isEditable: false,
+      }));
 
-    setStations(formReadyStations);
+      setStations(formReadyStations);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const toggleBroadcastItemEditable = async (Id) => {
-    const updatedBroadcastItem = broadcastingSchedule.find(
-      (item) => item.Id === Id
-    );
-
-    if (updatedBroadcastItem.isEditable) {
-      const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
-      const timeValidation = zuluTimeRegEx.test(updatedBroadcastItem.time);
-      if (!timeValidation)
-        return setError("You must enter a valid broadcast time.");
-
-      const formattedBroadcastItem = {
-        Id: updatedBroadcastItem.Id,
-        time: updatedBroadcastItem.time,
-        ncs: updatedBroadcastItem.ncs,
-      };
-      const response = await updateListItem(
-        "broadcastingschedule",
-        formattedBroadcastItem
+    try {
+      const updatedBroadcastItem = broadcastingSchedule.find(
+        (item) => item.Id === Id
       );
-    }
 
-    setBroadcastingSchedule((prevSchedule) =>
-      prevSchedule.map((item) =>
-        item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
-      )
-    );
+      if (updatedBroadcastItem.isEditable) {
+        const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
+        const timeValidation = zuluTimeRegEx.test(updatedBroadcastItem.time);
+        if (!timeValidation)
+          return setError("You must enter a valid broadcast time.");
+
+        const formattedBroadcastItem = {
+          Id: updatedBroadcastItem.Id,
+          time: updatedBroadcastItem.time,
+          ncs: updatedBroadcastItem.ncs,
+        };
+        const response = await updateListItem(
+          "broadcastingschedule",
+          formattedBroadcastItem
+        );
+      }
+
+      setBroadcastingSchedule((prevSchedule) =>
+        prevSchedule.map((item) =>
+          item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const toggleMNCSItemEditable = async (Id) => {
-    if (mncsSchedule.find((item) => item.Id === Id).isEditable) {
-      const updatedMNCSItem = mncsSchedule.find((item) => item.Id === Id);
-      const formattedMNCSItem = {
-        Id: updatedMNCSItem.Id,
-        ncs: updatedMNCSItem.ncs,
-        months: updatedMNCSItem.months,
-      };
-      const response = await updateListItem("mncsschedule", formattedMNCSItem);
-    }
+    try {
+      if (mncsSchedule.find((item) => item.Id === Id).isEditable) {
+        const updatedMNCSItem = mncsSchedule.find((item) => item.Id === Id);
+        const formattedMNCSItem = {
+          Id: updatedMNCSItem.Id,
+          ncs: updatedMNCSItem.ncs,
+          months: updatedMNCSItem.months,
+        };
+        const response = await updateListItem(
+          "mncsschedule",
+          formattedMNCSItem
+        );
+      }
 
-    setMncsSchedule((prevSchedule) =>
-      prevSchedule.map((item) =>
-        item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
-      )
-    );
+      setMncsSchedule((prevSchedule) =>
+        prevSchedule.map((item) =>
+          item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const toggleStationItemEditable = async (Id) => {
-    if (stations.find((item) => item.Id === Id).isEditable) {
-      const updatedStationItem = stations.find((item) => item.Id === Id);
-      const formattedStationItem = {
-        Id: updatedStationItem.Id,
-        station: updatedStationItem.station,
-        name: updatedStationItem.name,
-        ncs: updatedStationItem.ncs,
-      };
-      const response = await updateListItem("stations", formattedStationItem);
-    }
+    try {
+      if (stations.find((item) => item.Id === Id).isEditable) {
+        const updatedStationItem = stations.find((item) => item.Id === Id);
+        const formattedStationItem = {
+          Id: updatedStationItem.Id,
+          station: updatedStationItem.station,
+          name: updatedStationItem.name,
+          ncs: updatedStationItem.ncs,
+        };
+        const response = await updateListItem("stations", formattedStationItem);
+      }
 
-    setStations((prevStations) =>
-      prevStations.map((item) =>
-        item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
-      )
-    );
+      setStations((prevStations) =>
+        prevStations.map((item) =>
+          item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleEditField = (Id, field, value, type) => {
@@ -153,10 +212,16 @@ const MainSettings = () => {
     setError("");
   };
 
+  const loadSettings = async () => {
+    await Promise.all([
+      await fetchBroadcastingSchedule(),
+      await fetchMNCSSchedule(),
+      await fetchStations(),
+    ]);
+  };
+
   useEffect(() => {
-    fetchBroadcastingSchedule();
-    fetchMNCSSchedule();
-    fetchStations();
+    loadSettings();
   }, []);
 
   return (

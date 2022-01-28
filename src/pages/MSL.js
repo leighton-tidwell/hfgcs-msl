@@ -26,7 +26,7 @@ const MSLPage = ({ shift }) => {
   const [actionEntry, setActionEntry] = useState({
     category: "",
     zuluDate: dayjs().format("YYYY-MM-DD"),
-    time: dayjs().format("HHmm"),
+    time: "",
     operatorInitials: "",
     action: "",
   });
@@ -52,15 +52,17 @@ const MSLPage = ({ shift }) => {
 
       if (entry.zuluDate === date)
         setEntries((prevEntries) =>
-          [...prevEntries, entryWithId].sort((a, b) =>
-            a.time > b.time ? 1 : -1
-          )
+          [...prevEntries, entryWithId].sort((a, b) => {
+            if (a.time === b.time) return a.Id > b.Id ? 1 : -1;
+            return a.time > b.time ? 1 : -1;
+          })
         );
     } catch (error) {
       toast({
         title: `An error occured: ${error.message}`,
         status: "error",
         isClosable: true,
+        position: "top",
       });
 
       return false;
@@ -70,7 +72,7 @@ const MSLPage = ({ shift }) => {
       ...prevEntry,
       category: "",
       zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
+      time: "",
       action: "",
     }));
 
@@ -88,42 +90,65 @@ const MSLPage = ({ shift }) => {
       ...entry,
     };
 
-    const response = await updateListItem("eventlog", entry);
-
-    setEntries((prevEntries) =>
-      prevEntries.map((e) => (e.Id === entry.Id ? formattedEntry : e))
-    );
+    try {
+      setEntries((prevEntries) =>
+        prevEntries.map((e) => (e.Id === entry.Id ? formattedEntry : e))
+      );
+      await updateListItem("eventlog", entry);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const removeActionEntry = async (id) => {
-    const response = await removeFromList("eventlog", id);
-
-    setEntries((prevEntries) => prevEntries.filter((e) => e.Id !== id));
+    try {
+      setEntries((prevEntries) => prevEntries.filter((e) => e.Id !== id));
+      await removeFromList("eventlog", id);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchEntries = async () => {
     setEntries([]);
     setLoading(true);
-    const entries = await getActionsForDate(date);
-    const formattedEntries = entries.map((entry) => ({
-      category: entry.eventcategory,
-      zuluDate: entry.entrydate,
-      time: entry.entrytime,
-      operatorInitials: entry.operatorinitials,
-      action: entry.action,
-      ...entry,
-    }));
 
-    const sortedEntries = formattedEntries.sort((a, b) =>
-      a.time > b.time ? 1 : -1
-    );
+    try {
+      const entries = await getActionsForDate(date);
+      const formattedEntries = entries.map((entry) => ({
+        category: entry.eventcategory,
+        zuluDate: entry.entrydate,
+        time: entry.entrytime,
+        operatorInitials: entry.operatorinitials,
+        action: entry.action,
+        ...entry,
+      }));
 
-    setEntries(sortedEntries);
+      const sortedEntries = formattedEntries.sort((a, b) => {
+        if (a.time === b.time) return a.Id > b.Id ? 1 : -1;
+        return a.time > b.time ? 1 : -1;
+      });
+      setEntries(sortedEntries);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
+
     setLoading(false);
-  };
-
-  const updateDate = (date) => {
-    setDate(date);
   };
 
   useEffect(() => {
@@ -147,6 +172,7 @@ const MSLPage = ({ shift }) => {
             actionEntry={actionEntry}
             onSubmit={submitActionEntry}
             shift={shift}
+            changeCalendarDate={setDate}
           />
         </Box>
         <Box display="flex" flexBasis="60%" flexDir="column">
@@ -157,10 +183,10 @@ const MSLPage = ({ shift }) => {
             fontSize="lg"
             fontWeight="bold"
           >
-            <DatePicker onChange={updateDate} date={date} />
+            <DatePicker date={date} />
             <Box float="right">
               <SettingsModal />
-              <PrintModal />
+              <PrintModal selectedDate={date} />
             </Box>
           </Box>
           <EntryTable

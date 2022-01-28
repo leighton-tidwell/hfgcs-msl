@@ -1,106 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { Logo, ShiftSelect } from "../components";
 import DefaultLayout from "../layouts/Default";
-import { Box, Grid, Text } from "@chakra-ui/react";
+import { Box, Grid, Text, useToast } from "@chakra-ui/react";
 import { getShifts } from "../api";
-
-// const dayStaff = {
-//   shiftName: "Day Staff",
-//   shiftLead: "SSgt Rando",
-//   operators: ["Sgt. Rando", "Sgt. Rando", "Sgt. Rando", "Sgt. Rando"],
-// };
-
-// const shifts = [
-//   {
-//     shiftName: "Alpha 1",
-//     shiftLead: "SSgt Rando",
-//     operators: [
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//     ],
-//   },
-//   {
-//     shiftName: "Alpha 2",
-//     shiftLead: "SSgt Rando",
-//     operators: [
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//     ],
-//   },
-//   {
-//     shiftName: "Alpha 3",
-//     shiftLead: "SSgt Rando",
-//     operators: [
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//     ],
-//   },
-//   {
-//     shiftName: "Alpha 4",
-//     shiftLead: "SSgt Rando",
-//     operators: [
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//       "Sgt. Rando",
-//     ],
-//   },
-// ];
-
-// const alphaOne = {
-//   shiftLead: "SSgt Dingus",
-//   operators: ["Sgt. Dingus", "Sgt. Dingus", "Sgt. Dingus"],
-// };
 
 const SplashPage = ({ setShift }) => {
   const [shifts, setShifts] = useState(null);
   const [dayShift, setDayShift] = useState(null);
+  const toast = useToast();
 
   const fetchShifts = async () => {
-    const data = await getShifts();
-    const filteredShifts = data.filter((shift) => shift.isDayShift === "false");
-    setShifts(filteredShifts);
+    try {
+      const data = await getShifts();
+      const filteredShifts = data.filter(
+        (shift) => shift.isDayShift === "false"
+      );
+      setShifts(filteredShifts);
 
-    const dayShiftName = data.filter((shift) => shift.isDayShift === "true")[0];
-    setDayShift(dayShiftName.name);
+      const dayShiftName = data.filter(
+        (shift) => shift.isDayShift === "true"
+      )[0];
+      setDayShift(dayShiftName?.name);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   useEffect(() => {

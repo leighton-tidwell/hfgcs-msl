@@ -22,6 +22,7 @@ import {
   PinInputField,
   Checkbox,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { Select, Input, Textarea } from "..";
 import { getShiftPersonnel, getRXMedians } from "../../api";
@@ -29,14 +30,16 @@ import dayjs from "dayjs";
 
 const QueueStatus = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [error, setError] = useState("");
   const [rxMedians, setRxMedians] = useState([]);
   const [shiftMembers, setShiftMembers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(true);
   const [formData, setFormData] = useState({
     category: "QUEUE STATUS",
     zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+    time: "",
     operatorInitials: actionEntry.operatorInitials,
     shiftLeadRank: "",
     action: "",
@@ -44,19 +47,39 @@ const QueueStatus = ({ shift, actionEntry, onSubmit }) => {
   });
 
   const fetchShiftMembers = async () => {
-    const shiftMembers = await getShiftPersonnel(shift ? shift : "");
-    setShiftMembers(shiftMembers);
+    try {
+      const shiftMembers = await getShiftPersonnel(shift ? shift : "");
+      setShiftMembers(shiftMembers);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchRxMedians = async () => {
-    const rxMedianList = await getRXMedians("eam");
-    setRxMedians(rxMedianList);
+    try {
+      const rxMedianList = await getRXMedians("eam");
+      setRxMedians(rxMedianList);
 
-    const defaultRx = rxMedianList.find((median) => median.default === "true");
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      rxMedian: defaultRx ? defaultRx.name : "",
-    }));
+      const defaultRx = rxMedianList.find(
+        (median) => median.default === "true"
+      );
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        rxMedian: defaultRx ? defaultRx.name : "",
+      }));
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDataChange = (e) => {
@@ -84,20 +107,29 @@ const QueueStatus = ({ shift, actionEntry, onSubmit }) => {
     if (!formData.category) return setError("You must enter a category.");
     setLoading(true);
 
-    const entryObj = {
-      ...formData,
-      zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
-    };
+    try {
+      const entryObj = {
+        ...formData,
+        zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
+      };
 
-    await onSubmit(entryObj);
+      await onSubmit(entryObj);
 
-    setFormData({
-      ...formData,
-      category: "QUEUE STATUS",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
-      action: "",
-    });
+      setFormData({
+        ...formData,
+        category: "QUEUE STATUS",
+        zuluDate: dayjs().format("YYYY-MM-DD"),
+        time: dayjs().format("HHmm"),
+        action: "",
+      });
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
 
     setLoading(false);
     onClose();
@@ -108,9 +140,13 @@ const QueueStatus = ({ shift, actionEntry, onSubmit }) => {
     setLoading(false);
   };
 
+  const loadFormBuilder = async () => {
+    await Promise.all([await fetchShiftMembers(), await fetchRxMedians()]);
+    setFormLoading(false);
+  };
+
   useEffect(() => {
-    fetchShiftMembers();
-    fetchRxMedians();
+    loadFormBuilder();
   }, []);
 
   useEffect(() => {
@@ -141,19 +177,10 @@ const QueueStatus = ({ shift, actionEntry, onSubmit }) => {
     formData.rxMedian,
   ]);
 
-  useEffect(() => {
-    setFormData({
-      ...formData,
-      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
-      operatorInitials: actionEntry.operatorInitials,
-    });
-  }, [actionEntry]);
-
   return (
     <>
-      <Button onClick={onOpen} colorScheme="green">
-        Form Builder
+      <Button onClick={onOpen} isDisabled={formLoading} colorScheme="green">
+        {formLoading ? <Spinner /> : "Form Builder"}
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -198,7 +225,7 @@ const QueueStatus = ({ shift, actionEntry, onSubmit }) => {
                     name="operatorInitials"
                     onChange={handleDataChange}
                   >
-                    {shiftMembers.map((member) => (
+                    {shiftMembers?.map((member) => (
                       <option key={member.Id} value={member.initials}>
                         {member.initials} | {member.lastname}
                       </option>
@@ -236,7 +263,7 @@ const QueueStatus = ({ shift, actionEntry, onSubmit }) => {
                     name="rxMedian"
                     onChange={handleDataChange}
                   >
-                    {rxMedians.map((median) => (
+                    {rxMedians?.map((median) => (
                       <option key={median.Id} value={median.name}>
                         {median.name}
                       </option>

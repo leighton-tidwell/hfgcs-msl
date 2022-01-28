@@ -1,13 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { Box, Text, Spinner } from "@chakra-ui/react";
+import { Box, Text, Spinner, useToast } from "@chakra-ui/react";
 import { getShiftPersonnel } from "../api";
 
 const ShiftSelect = ({ onClick, shiftName }) => {
   const [operatorList, setOperatorList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   const fetchOperators = async () => {
-    const data = await getShiftPersonnel(shiftName);
-    setOperatorList(data);
+    try {
+      const data = await getShiftPersonnel(shiftName);
+      setOperatorList(data);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
+
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -24,16 +37,21 @@ const ShiftSelect = ({ onClick, shiftName }) => {
       rounded="sm"
       p={3}
     >
-      <Text fontWeight="600" textAlign="center">
+      <Text fontWeight="600" fontSize="lg" textAlign="center">
         {shiftName}
       </Text>
       <Text>
-        {!operatorList.length && <Spinner size="xl" />}
-        {operatorList.map((operator) => (
-          <Text>
-            {operator.rank} {operator.lastname}
-          </Text>
-        ))}
+        {loading ? (
+          <Box display="flex" alignItems="center" justifyContent="center">
+            <Spinner size="xl" />
+          </Box>
+        ) : (
+          operatorList.map((operator) => (
+            <Text key={operator.Id}>
+              {operator.rank} {operator.lastname}
+            </Text>
+          ))
+        )}
       </Text>
     </Box>
   );

@@ -18,13 +18,18 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  useToast,
+  Spinner,
 } from "@chakra-ui/react";
-import { Input, Select, Textarea } from ".";
+import { Input, Textarea } from ".";
 import { EditIcon } from ".";
 import { getAction } from "../api";
 import dayjs from "dayjs";
 
 const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
+  const [loading, setLoading] = useState(true);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
   const [error, setError] = useState("");
   const [entry, setEntry] = useState({
     Id: "",
@@ -35,15 +40,27 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
     action: "",
   });
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
   const fetchEntryDetails = async () => {
-    const response = await getAction(entryID);
-    if (!response.length) return;
-    const newEntry = {
-      ...response[0],
-      entrydate: dayjs(response[0].entrydate).format("YYYY-MM-DD"),
-    };
-    setEntry(newEntry);
+    try {
+      const response = await getAction(entryID);
+      if (!response.length) throw new Error("entry not found.");
+      const newEntry = {
+        ...response[0],
+        entrydate: dayjs(response[0].entrydate).format("YYYY-MM-DD"),
+      };
+      setEntry(newEntry);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+      onClose();
+    }
+    setLoading(false);
   };
 
   const handleCategoryChange = (e) => {
@@ -88,7 +105,7 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
     setError("");
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setError("");
     const zuluTimeRegEx = new RegExp(/^([01]\d|2[0-3]):?([0-5]\d)$/);
     const timeValidation = zuluTimeRegEx.test(entry.entrytime);
@@ -98,23 +115,45 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
       return setError("You must enter operator initials.");
     if (!entry.action) return setError("You must enter an action.");
     if (!entry.eventcategory) return setError("You must enter a category.");
+    setLoadingSave(true);
 
-    const entryObj = {
-      action: entry.action,
-      operatorinitials: entry.operatorinitials,
-      Id: entry.Id,
-      eventcategory: entry.eventcategory,
-      entrytime: entry.entrytime,
-      entrydate: dayjs(entry.entrydate).format("MM/DD/YYYY"),
-    };
+    try {
+      const entryObj = {
+        action: entry.action,
+        operatorinitials: entry.operatorinitials,
+        Id: entry.Id,
+        eventcategory: entry.eventcategory,
+        entrytime: entry.entrytime,
+        entrydate: dayjs(entry.entrydate).format("MM/DD/YYYY"),
+      };
 
-    updateEntry(entryObj);
-    onClose();
+      await updateEntry(entryObj);
+      onClose();
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
+    setLoadingSave(false);
   };
 
-  const handleDelete = () => {
-    removeEntry(entry.Id);
-    onClose();
+  const handleDelete = async () => {
+    setLoadingDelete(true);
+    try {
+      await removeEntry(entry.Id);
+      onClose();
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
+    setLoadingDelete(false);
   };
 
   useEffect(() => {
@@ -129,13 +168,16 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
       <Modal size="xl" isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent bg="gray.900" color="white">
-          <ModalHeader>Edit Entry</ModalHeader>
+          <ModalHeader>
+            Edit Entry {loading && <Spinner size="sm" />}
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={4}>
               <FormControl id="event-category" isRequired>
                 <FormLabel>Event Category</FormLabel>
                 <Input
+                  isDisabled={loading}
                   onChange={handleCategoryChange}
                   value={entry.eventcategory}
                 />
@@ -143,6 +185,7 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
               <FormControl id="date" isRequired>
                 <FormLabel>Zulu Date</FormLabel>
                 <Input
+                  isDisabled={loading}
                   onChange={handleDateChange}
                   value={entry.entrydate}
                   type="date"
@@ -151,6 +194,7 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
               <FormControl id="time" isRequired>
                 <FormLabel>Time (Z)</FormLabel>
                 <Input
+                  isDisabled={loading}
                   onChange={handleTimeChange}
                   value={entry.entrytime}
                   type="text"
@@ -159,6 +203,7 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
               <FormControl id="op-init" isRequired>
                 <FormLabel>Operator Initials</FormLabel>
                 <Input
+                  isDisabled={loading}
                   onChange={handleOperatorInitialsChange}
                   value={entry.operatorinitials}
                   type="text"
@@ -167,6 +212,7 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
               <FormControl id="action" isRequired>
                 <FormLabel>Action/Event</FormLabel>
                 <Textarea
+                  isDisabled={loading}
                   onChange={handleActionChange}
                   value={entry.action}
                   type="text"
@@ -188,11 +234,20 @@ const EditEntryModal = ({ entryID, updateEntry, removeEntry }) => {
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={handleSave} colorScheme="blue" mr={2}>
-              Save
+            <Button
+              onClick={handleSave}
+              disabled={loadingSave}
+              colorScheme="blue"
+              mr={2}
+            >
+              {loadingSave ? <Spinner /> : "Save"}
             </Button>
-            <Button onClick={handleDelete} colorScheme="red">
-              Delete
+            <Button
+              onClick={handleDelete}
+              disabled={loadingDelete}
+              colorScheme="red"
+            >
+              {loadingDelete ? <Spinner /> : "Delete"}
             </Button>
           </ModalFooter>
         </ModalContent>

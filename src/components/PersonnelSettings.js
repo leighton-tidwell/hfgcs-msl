@@ -11,6 +11,7 @@ import {
   Link,
   Checkbox,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { CheckIcon, DeleteIcon } from "@chakra-ui/icons";
 import {
@@ -34,101 +35,156 @@ const PersonnelSettings = () => {
   const [shifts, setShifts] = useState([]);
   const [shiftPersonnel, setShiftPersonnel] = useState([]);
   const [status, setStatus] = useState([]);
+  const toast = useToast();
 
   const fetchShifts = async () => {
-    const response = await getShifts();
-    const formReadyShifts = response.map((item) => ({
-      ...item,
-      isEditable: false,
-    }));
-    setShifts(formReadyShifts);
+    try {
+      const response = await getShifts();
+      const formReadyShifts = response.map((item) => ({
+        ...item,
+        isEditable: false,
+      }));
+      setShifts(formReadyShifts);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const toggleShiftItemEditable = async (Id) => {
-    const changedItem = shifts.find((item) => item.Id === Id);
+    try {
+      const changedItem = shifts.find((item) => item.Id === Id);
 
-    if (changedItem.isEditable) {
-      const formattedShiftItem = {
-        Id: changedItem.Id,
-        name: changedItem.name,
-        isDayShift: changedItem.isDayShift,
-      };
-      const response = await updateListItem("shift", formattedShiftItem);
+      if (changedItem.isEditable) {
+        const formattedShiftItem = {
+          Id: changedItem.Id,
+          name: changedItem.name,
+          isDayShift: changedItem.isDayShift,
+        };
+        const response = await updateListItem("shift", formattedShiftItem);
+      }
+
+      setShifts((prevShifts) =>
+        prevShifts.map((item) =>
+          item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
     }
-
-    setShifts((prevShifts) =>
-      prevShifts.map((item) =>
-        item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
-      )
-    );
   };
 
   const toggleShiftPersonnelItemEditable = async (Id) => {
-    const changedItem = shiftPersonnel.find((item) => item.Id === Id);
+    try {
+      const changedItem = shiftPersonnel.find((item) => item.Id === Id);
 
-    if (changedItem.isEditable) {
-      const formattedShiftPersonnelItem = {
-        Id: changedItem.Id,
-        rank: changedItem.rank,
-        lastname: changedItem.lastname,
-        initials: changedItem.initials,
-        isShiftLead: changedItem.isShiftLead,
-        status: changedItem.status,
-      };
-      const response = await updateListItem(
-        "personnel",
-        formattedShiftPersonnelItem
+      if (changedItem.isEditable) {
+        const formattedShiftPersonnelItem = {
+          Id: changedItem.Id,
+          rank: changedItem.rank,
+          lastname: changedItem.lastname,
+          initials: changedItem.initials,
+          isShiftLead: changedItem.isShiftLead,
+          status: changedItem.status,
+        };
+        const response = await updateListItem(
+          "personnel",
+          formattedShiftPersonnelItem
+        );
+      }
+
+      setShiftPersonnel((prevShiftPersonnel) =>
+        prevShiftPersonnel.map((item) =>
+          item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
+        )
       );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
     }
-
-    setShiftPersonnel((prevShiftPersonnel) =>
-      prevShiftPersonnel.map((item) =>
-        item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
-      )
-    );
   };
 
   const toggleStatusItemEditable = async (Id) => {
-    const changedItem = status.find((item) => item.Id === Id);
+    try {
+      const changedItem = status.find((item) => item.Id === Id);
 
-    if (changedItem.isEditable) {
-      const formattedStatusItem = {
-        Id: changedItem.Id,
-        status: changedItem.status,
-      };
-      const response = await updateListItem(
-        "personnelstatus",
-        formattedStatusItem
+      if (changedItem.isEditable) {
+        const formattedStatusItem = {
+          Id: changedItem.Id,
+          status: changedItem.status,
+        };
+        const response = await updateListItem(
+          "personnelstatus",
+          formattedStatusItem
+        );
+      }
+
+      setStatus((prevStatus) =>
+        prevStatus.map((item) =>
+          item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
+        )
       );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
     }
-
-    setStatus((prevStatus) =>
-      prevStatus.map((item) =>
-        item.Id === Id ? { ...item, isEditable: !item.isEditable } : item
-      )
-    );
   };
 
   const fetchPersonnel = async () => {
-    const response = await getShiftPersonnel();
-    const sortedPersonnel = response.sort((a, b) => {
-      return a.shift < b.shift ? 1 : -1;
-    });
+    try {
+      const response = await getShiftPersonnel();
+      const sortedPersonnel = response.sort((a, b) => {
+        return a.shift < b.shift ? 1 : -1;
+      });
 
-    const formReadyPersonnel = sortedPersonnel.map((item) => ({
-      ...item,
-      isEditable: false,
-    }));
-    setShiftPersonnel(formReadyPersonnel);
+      const formReadyPersonnel = sortedPersonnel.map((item) => ({
+        ...item,
+        isEditable: false,
+      }));
+      setShiftPersonnel(formReadyPersonnel);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchStatus = async () => {
-    const response = await getPersonnelStatus();
-    const formReadyStatus = response.map((item) => ({
-      ...item,
-      isEditable: false,
-    }));
-    setStatus(formReadyStatus);
+    try {
+      const response = await getPersonnelStatus();
+      const formReadyStatus = response.map((item) => ({
+        ...item,
+        isEditable: false,
+      }));
+      setStatus(formReadyStatus);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleEditField = (Id, field, value) => {
@@ -152,66 +208,126 @@ const PersonnelSettings = () => {
   };
 
   const handleAddShift = async (shift) => {
-    const formattedShift = {
-      ...shift,
-      isDayShift: shift.isDayShift === "Yes" ? "true" : "false",
-    };
+    try {
+      const formattedShift = {
+        ...shift,
+        isDayShift: shift.isDayShift === "Yes" ? "true" : "false",
+      };
 
-    const response = await insertIntoList("shift", formattedShift);
-    const newShift = {
-      ...formattedShift,
-      isEditable: false,
-      Id: response,
-    };
-    setShifts((prevShifts) => [...prevShifts, newShift]);
+      const response = await insertIntoList("shift", formattedShift);
+      const newShift = {
+        ...formattedShift,
+        isEditable: false,
+        Id: response,
+      };
+      setShifts((prevShifts) => [...prevShifts, newShift]);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDeleteShift = async (Id) => {
-    const response = await removeFromList("shift", Id);
-    setShifts((prevShifts) => prevShifts.filter((item) => item.Id !== Id));
+    try {
+      setShifts((prevShifts) => prevShifts.filter((item) => item.Id !== Id));
+      const response = await removeFromList("shift", Id);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleAddPersonnel = async (personnel) => {
-    const formattedPersonnel = {
-      ...personnel,
-      isShiftLead: personnel.isShiftLead === "Yes" ? "true" : "false",
-    };
-    const response = await insertIntoList("personnel", formattedPersonnel);
-    const newPersonnel = {
-      ...formattedPersonnel,
-      isEditable: false,
-      Id: response,
-    };
+    try {
+      const formattedPersonnel = {
+        ...personnel,
+        isShiftLead: personnel.isShiftLead === "Yes" ? "true" : "false",
+      };
+      const response = await insertIntoList("personnel", formattedPersonnel);
+      const newPersonnel = {
+        ...formattedPersonnel,
+        isEditable: false,
+        Id: response,
+      };
 
-    setShiftPersonnel((prevPersonnel) => [...prevPersonnel, newPersonnel]);
+      setShiftPersonnel((prevPersonnel) => [...prevPersonnel, newPersonnel]);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDeletePersonnel = async (Id) => {
-    const response = await removeFromList("personnel", Id);
-    setShiftPersonnel((prevPersonnel) =>
-      prevPersonnel.filter((item) => item.Id !== Id)
-    );
+    try {
+      setShiftPersonnel((prevPersonnel) =>
+        prevPersonnel.filter((item) => item.Id !== Id)
+      );
+      const response = await removeFromList("personnel", Id);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleAddStatus = async (status) => {
-    const response = await insertIntoList("personnelstatus", status);
-    const newStatus = {
-      ...status,
-      isEditable: false,
-      Id: response,
-    };
-    setStatus((prevStatus) => [...prevStatus, newStatus]);
+    try {
+      const response = await insertIntoList("personnelstatus", status);
+      const newStatus = {
+        ...status,
+        isEditable: false,
+        Id: response,
+      };
+      setStatus((prevStatus) => [...prevStatus, newStatus]);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDeleteStatus = async (Id) => {
-    const response = await removeFromList("personnelstatus", Id);
-    setStatus((prevStatus) => prevStatus.filter((item) => item.Id !== Id));
+    try {
+      setStatus((prevStatus) => prevStatus.filter((item) => item.Id !== Id));
+      const response = await removeFromList("personnelstatus", Id);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
+  };
+
+  const loadSettings = async () => {
+    await Promise.all([
+      await fetchShifts(),
+      await fetchPersonnel(),
+      await fetchStatus(),
+    ]);
   };
 
   useEffect(() => {
-    fetchShifts();
-    fetchPersonnel();
-    fetchStatus();
+    loadSettings();
   }, []);
 
   const addShiftParams = {

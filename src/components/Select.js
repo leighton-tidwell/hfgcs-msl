@@ -8,6 +8,7 @@ const Select = ({
   value,
   placeholder,
   name,
+  isDisabled,
   size,
 }) => {
   return (
@@ -18,6 +19,7 @@ const Select = ({
       value={value}
       name={name}
       size={size}
+      isDisabled={isDisabled}
       placeholder={placeholder}
       borderColor="blue.700"
       borderWidth="2px"

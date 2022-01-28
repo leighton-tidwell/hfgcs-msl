@@ -10,6 +10,7 @@ import {
   Td,
   Link,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import {
   getLinks,
@@ -22,15 +23,25 @@ import { ConfirmModal, Input, AddSettingsModal } from ".";
 
 const LinkSettings = () => {
   const [links, setLinks] = useState([]);
+  const toast = useToast();
 
   const fetchLinks = async () => {
-    const response = await getLinks();
-    const formReadyLinks = response.map((item) => ({
-      ...item,
-      isEditable: false,
-    }));
+    try {
+      const response = await getLinks();
+      const formReadyLinks = response.map((item) => ({
+        ...item,
+        isEditable: false,
+      }));
 
-    setLinks(formReadyLinks);
+      setLinks(formReadyLinks);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleEditField = (Id, field, value) => {
@@ -42,36 +53,63 @@ const LinkSettings = () => {
   };
 
   const toggleLinkItemEditable = async (Id) => {
-    const updatedLinkItem = links.find((item) => item.Id === Id);
-    if (updatedLinkItem.isEditable) {
-      const formattedLinkItem = {
-        Id: updatedLinkItem.Id,
-        name: updatedLinkItem.name,
-        link: updatedLinkItem.link,
-      };
-      const response = await updateListItem("links", formattedLinkItem);
-    }
+    try {
+      const updatedLinkItem = links.find((item) => item.Id === Id);
+      if (updatedLinkItem.isEditable) {
+        const formattedLinkItem = {
+          Id: updatedLinkItem.Id,
+          name: updatedLinkItem.name,
+          link: updatedLinkItem.link,
+        };
+        const response = await updateListItem("links", formattedLinkItem);
+      }
 
-    setLinks((prevLinks) =>
-      prevLinks.map((link) =>
-        link.Id === Id ? { ...link, isEditable: !link.isEditable } : link
-      )
-    );
+      setLinks((prevLinks) =>
+        prevLinks.map((link) =>
+          link.Id === Id ? { ...link, isEditable: !link.isEditable } : link
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDeleteLink = async (Id) => {
-    const response = await removeFromList("links", Id);
-    setLinks((prevLinks) => prevLinks.filter((item) => item.Id !== Id));
+    try {
+      setLinks((prevLinks) => prevLinks.filter((item) => item.Id !== Id));
+      const response = await removeFromList("links", Id);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleAddLink = async (link) => {
-    const response = await insertIntoList("links", link);
-    const newLink = {
-      ...link,
-      isEditable: false,
-      Id: response,
-    };
-    setLinks((prevLinks) => [...prevLinks, newLink]);
+    try {
+      const response = await insertIntoList("links", link);
+      const newLink = {
+        ...link,
+        isEditable: false,
+        Id: response,
+      };
+      setLinks((prevLinks) => [...prevLinks, newLink]);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const addLinkParams = {

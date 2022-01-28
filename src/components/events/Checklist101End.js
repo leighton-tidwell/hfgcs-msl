@@ -22,6 +22,7 @@ import {
   Box,
   Stack,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { Select, Input, Textarea, StationStatus } from "../";
 import { getShiftPersonnel, getStations, updateListItem } from "../../api";
@@ -29,27 +30,47 @@ import dayjs from "dayjs";
 
 const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(true);
   const [shiftMembers, setShiftMembers] = useState([]);
   const [stations, setStations] = useState([]);
   const [toggleStations, setToggleStations] = useState("ANCS");
   const [formData, setFormData] = useState({
     category: "CHKLST NOTE - 101 (END)",
     zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+    time: "",
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
 
   const fetchShiftMembers = async () => {
-    const shiftMembers = await getShiftPersonnel(shift ? shift : "");
-    setShiftMembers(shiftMembers);
+    try {
+      const shiftMembers = await getShiftPersonnel(shift ? shift : "");
+      setShiftMembers(shiftMembers);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchStations = async () => {
-    const stations = await getStations();
-    setStations(stations);
+    try {
+      const stations = await getStations();
+      setStations(stations);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDataChange = (e) => {
@@ -94,39 +115,48 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
     if (!formData.category) return setError("You must enter a category.");
     setLoading(true);
 
-    const entryObj = {
-      ...formData,
-      zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
-    };
+    try {
+      const entryObj = {
+        ...formData,
+        zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
+      };
 
-    await Promise.all(
-      stations.map(async (station) => {
-        const newStation = {
-          Id: station.Id,
-          station: station.station,
-          name: station.name,
-          stratdesc: station.stratdesc,
-          stratcolor: station.stratcolor,
-          scansdesc: station.scansdesc,
-          scanscolor: station.scanscolor,
-          aledesc: station.aledesc,
-          alecolor: station.alecolor,
-          dtmfdesc: station.dtmfdesc,
-          dtmfcolor: station.dtmfcolor,
-          otherdesc: station.otherdesc,
-        };
-        await updateListItem("stations", newStation);
-      })
-    );
+      await Promise.all(
+        stations.map(async (station) => {
+          const newStation = {
+            Id: station.Id,
+            station: station.station,
+            name: station.name,
+            stratdesc: station.stratdesc,
+            stratcolor: station.stratcolor,
+            scansdesc: station.scansdesc,
+            scanscolor: station.scanscolor,
+            aledesc: station.aledesc,
+            alecolor: station.alecolor,
+            dtmfdesc: station.dtmfdesc,
+            dtmfcolor: station.dtmfcolor,
+            otherdesc: station.otherdesc,
+          };
+          await updateListItem("stations", newStation);
+        })
+      );
 
-    await onSubmit(entryObj);
+      await onSubmit(entryObj);
 
-    setFormData({
-      ...formData,
-      category: "CHKLST NOTE - 101 (END)",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
-    });
+      setFormData({
+        ...formData,
+        category: "CHKLST NOTE - 101 (END)",
+        zuluDate: dayjs().format("YYYY-MM-DD"),
+        time: dayjs().format("HHmm"),
+      });
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
 
     setLoading(false);
     onClose();
@@ -137,9 +167,13 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
     setLoading(false);
   };
 
+  const loadFormBuilder = async () => {
+    await Promise.all([await fetchShiftMembers(), await fetchStations()]);
+    setFormLoading(false);
+  };
+
   useEffect(() => {
-    fetchShiftMembers();
-    fetchStations();
+    loadFormBuilder();
   }, []);
 
   useEffect(() => {
@@ -166,24 +200,17 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
     }));
   }, [stations]);
 
-  useEffect(() => {
-    setFormData({
-      ...formData,
-      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
-      operatorInitials: actionEntry.operatorInitials,
-    });
-  }, [actionEntry]);
-
   return (
     <>
-      <Button onClick={onOpen} colorScheme="green">
-        Form Builder
+      <Button onClick={onOpen} isDisabled={formLoading} colorScheme="green">
+        {formLoading ? <Spinner /> : "Form Builder"}
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent minW="95VW" bg="gray.900" color="white">
-          <ModalHeader>CHKLST NOTE - 101 (END)</ModalHeader>
+          <ModalHeader>
+            CHKLST NOTE - 101 (END) {formLoading && <Spinner size="sm" />}
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Stack direction="row" spacing={5}>
@@ -200,6 +227,7 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
                 <FormControl id="date" isRequired>
                   <FormLabel>Zulu Date</FormLabel>
                   <Input
+                    isDisabled={formLoading}
                     onChange={handleDataChange}
                     value={formData.zuluDate}
                     name="zuluDate"
@@ -209,6 +237,7 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
                 <FormControl id="time" isRequired>
                   <FormLabel>Time (Z)</FormLabel>
                   <Input
+                    isDisabled={formLoading}
                     onChange={handleDataChange}
                     value={formData.time}
                     name="time"
@@ -218,12 +247,13 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
                 <FormControl id="op-init" isRequired>
                   <FormLabel>Operator Initials</FormLabel>
                   <Select
+                    isDisabled={formLoading}
                     value={formData.operatorInitials}
                     placeholder="Select an operator"
                     name="operatorInitials"
                     onChange={handleDataChange}
                   >
-                    {shiftMembers.map((member) => (
+                    {shiftMembers?.map((member) => (
                       <option key={member.Id} value={member.initials}>
                         {member.initials} | {member.lastname}
                       </option>
@@ -233,6 +263,7 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
                 <FormControl id="action" isRequired>
                   <FormLabel>Action/Event</FormLabel>
                   <Textarea
+                    isDisabled={formLoading}
                     onChange={handleDataChange}
                     name="action"
                     type="text"
@@ -260,6 +291,7 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
                     Station Statuses
                   </Text>
                   <Button
+                    isDisabled={formLoading}
                     colorScheme="blue"
                     onClick={() =>
                       setToggleStations(
@@ -270,18 +302,22 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
                     Show {toggleStations === "ANCS" ? "GFNCS" : "ANCS"} Stations
                   </Button>
                 </Box>
-                <Grid templateColumns="auto auto" alignItems="center" gap={3}>
-                  {stations.map(
-                    (station) =>
-                      station.ncs === toggleStations && (
-                        <StationStatus
-                          key={station.Id}
-                          handleStationChange={handleStationChange}
-                          station={station}
-                        />
-                      )
-                  )}
-                </Grid>
+                {stations.length ? (
+                  <Grid templateColumns="auto auto" alignItems="center" gap={3}>
+                    {stations?.map(
+                      (station) =>
+                        station.ncs === toggleStations && (
+                          <StationStatus
+                            key={station.Id}
+                            handleStationChange={handleStationChange}
+                            station={station}
+                          />
+                        )
+                    )}
+                  </Grid>
+                ) : (
+                  <Spinner size="lg" />
+                )}
               </Box>
             </Stack>
           </ModalBody>
@@ -295,7 +331,11 @@ const Checklist101End = ({ shift, actionEntry, onSubmit }) => {
             >
               Cancel
             </Button>
-            <Button disabled={loading} colorScheme="blue" onClick={handleSave}>
+            <Button
+              disabled={loading || formLoading}
+              colorScheme="blue"
+              onClick={handleSave}
+            >
               {loading ? <Spinner size="sm" /> : "Save"}
             </Button>
           </ModalFooter>

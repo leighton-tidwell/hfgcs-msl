@@ -64,14 +64,14 @@ const EntryTable = ({ entries, updateEntry, removeEntry, loading, ref }) => {
               </Td>
             </Tr>
           )}
-          {!entries.length && !loading && (
+          {!entries?.length && !loading && (
             <Tr>
               <Td colSpan="5" textAlign="center">
                 <Text fontWeight="bolder">No entries found</Text>
               </Td>
             </Tr>
           )}
-          {entries.map((entry) => (
+          {entries?.map((entry) => (
             <Tr key={entry.Id}>
               <Td>
                 <EditEntryModal

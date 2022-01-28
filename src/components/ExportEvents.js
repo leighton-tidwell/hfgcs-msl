@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Box, Text, Button, FormControl, FormLabel } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  Button,
+  FormControl,
+  FormLabel,
+  useToast,
+  Spinner,
+} from "@chakra-ui/react";
 import { Input } from ".";
 import ExcelJS from "exceljs/dist/es5/exceljs.browser.js";
 import { saveAs } from "file-saver";
@@ -7,6 +15,8 @@ import dayjs from "dayjs";
 import { getActionsForRange } from "../api";
 
 const ExportEvents = () => {
+  const toast = useToast();
+  const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState(
     dayjs().subtract(2, "week").format("YYYY-MM-DD")
   );
@@ -21,61 +31,74 @@ const ExportEvents = () => {
   };
 
   const generateReport = async () => {
-    const formattedStartDate = dayjs(startDate).format("MM/DD/YYYY");
-    const formattedEndDate = dayjs(endDate).format("MM/DD/YYYY");
+    setLoading(true);
+    try {
+      const formattedStartDate = dayjs(startDate).format("MM/DD/YYYY");
+      const formattedEndDate = dayjs(endDate).format("MM/DD/YYYY");
 
-    const events = await getActionsForRange(
-      formattedStartDate,
-      formattedEndDate
-    );
+      const events = await getActionsForRange(
+        formattedStartDate,
+        formattedEndDate
+      );
 
-    const sortedEvents = events.sort((a, b) =>
-      dayjs(a.entrydate).unix() > dayjs(b.entrydate).unix() ? 1 : -1
-    );
+      const sortedEvents = events.sort((a, b) =>
+        dayjs(a.entrydate).unix() > dayjs(b.entrydate).unix() ? 1 : -1
+      );
 
-    const sortedByTime = sortedEvents.sort((a, b) => {
-      if (a.entrydate === b.entrydate)
-        return a.entrytime > b.entrytime ? 1 : -1;
-    });
+      const sortedByTime = sortedEvents.sort((a, b) => {
+        if (a.entrydate === b.entrydate) {
+          if (a.entrytime === b.entrytime) return a.Id > b.Id ? 1 : -1;
+          return a.entrytime > b.entrytime ? 1 : -1;
+        }
+      });
 
-    const wb = new ExcelJS.Workbook();
+      const wb = new ExcelJS.Workbook();
 
-    const ws = wb.addWorksheet();
+      const ws = wb.addWorksheet();
 
-    ws.columns = [
-      { key: "1", width: 150 },
-      { key: "2", width: 15 },
-      { key: "3", width: 10 },
-      { key: "4", width: 50 },
-      { key: "5", width: 20 },
-    ];
+      ws.columns = [
+        { key: "1", width: 150 },
+        { key: "2", width: 15 },
+        { key: "3", width: 10 },
+        { key: "4", width: 50 },
+        { key: "5", width: 20 },
+      ];
 
-    ws.addRow([
-      "ACTION",
-      "ENTRY DATE",
-      "ENTRY TIME",
-      "EVENT CATEGORY",
-      "OP INIT",
-    ]);
-
-    sortedByTime.forEach((event) => {
       ws.addRow([
-        event.action,
-        event.entrydate,
-        event.entrytime,
-        event.eventcategory,
-        event.operatorinitials,
+        "ACTION",
+        "ENTRY DATE",
+        "ENTRY TIME",
+        "EVENT CATEGORY",
+        "OP INIT",
       ]);
-    });
 
-    const buf = await wb.xlsx.writeBuffer();
+      sortedByTime.forEach((event) => {
+        ws.addRow([
+          event.action,
+          event.entrydate,
+          event.entrytime,
+          event.eventcategory,
+          event.operatorinitials,
+        ]);
+      });
 
-    saveAs(
-      new Blob([buf]),
-      `${dayjs(startDate).format("DD")}-${dayjs(endDate)
-        .format("DD MMM")
-        .toUpperCase()} MSL.xlsx`
-    );
+      const buf = await wb.xlsx.writeBuffer();
+
+      saveAs(
+        new Blob([buf]),
+        `${dayjs(startDate).format("DD")}-${dayjs(endDate)
+          .format("DD MMM")
+          .toUpperCase()} MSL.xlsx`
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
+    setLoading(false);
   };
 
   return (
@@ -109,8 +132,9 @@ const ExportEvents = () => {
           colorScheme="blue"
           width="300px"
           mr={2}
+          isDisabled={loading}
         >
-          Export Events
+          {loading ? <Spinner /> : "Export Events"}
         </Button>
       </Box>
     </Box>

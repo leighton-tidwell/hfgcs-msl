@@ -18,6 +18,7 @@ import {
   AlertDescription,
   CloseButton,
   Grid,
+  useToast,
 } from "@chakra-ui/react";
 import { Select, Input, Textarea, StationStatus } from "..";
 import { getShiftPersonnel } from "../../api";
@@ -25,21 +26,32 @@ import dayjs from "dayjs";
 
 const StnNote = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(true);
   const [shiftMembers, setShiftMembers] = useState([]);
   const [formData, setFormData] = useState({
     category: "TFC NOTE - __",
     zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+    time: "",
     operatorInitials: actionEntry.operatorInitials,
     action: "",
     activatedOrDeactivated: "ACTIVATED",
   });
 
   const fetchShiftMembers = async () => {
-    const shiftMembers = await getShiftPersonnel(shift ? shift : "");
-    setShiftMembers(shiftMembers);
+    try {
+      const shiftMembers = await getShiftPersonnel(shift ? shift : "");
+      setShiftMembers(shiftMembers);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDataChange = (e) => {
@@ -67,21 +79,30 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
     if (!formData.category) return setError("You must enter a category.");
     setLoading(true);
 
-    const entryObj = {
-      ...formData,
-      zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
-    };
+    try {
+      const entryObj = {
+        ...formData,
+        zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
+      };
 
-    await onSubmit(entryObj);
+      await onSubmit(entryObj);
 
-    setFormData({
-      ...formData,
-      category: "TFC NOTE - __",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
-      action: "",
-      activatedOrDeactivated: "ACTIVATED",
-    });
+      setFormData({
+        ...formData,
+        category: "TFC NOTE - __",
+        zuluDate: dayjs().format("YYYY-MM-DD"),
+        time: dayjs().format("HHmm"),
+        action: "",
+        activatedOrDeactivated: "ACTIVATED",
+      });
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
 
     setLoading(false);
     onClose();
@@ -92,8 +113,13 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
     setLoading(false);
   };
 
+  const loadFormBuilder = async () => {
+    await fetchShiftMembers();
+    setFormLoading(false);
+  };
+
   useEffect(() => {
-    fetchShiftMembers();
+    loadFormBuilder();
   }, []);
 
   useEffect(() => {
@@ -116,19 +142,10 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
     formData.trafficType,
   ]);
 
-  useEffect(() => {
-    setFormData({
-      ...formData,
-      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
-      operatorInitials: actionEntry.operatorInitials,
-    });
-  }, [actionEntry]);
-
   return (
     <>
-      <Button onClick={onOpen} colorScheme="green">
-        Form Builder
+      <Button onClick={onOpen} isDisabled={formLoading} colorScheme="green">
+        {formLoading ? <Spinner /> : "Form Builder"}
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -180,7 +197,7 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
                   name="operatorInitials"
                   onChange={handleDataChange}
                 >
-                  {shiftMembers.map((member) => (
+                  {shiftMembers?.map((member) => (
                     <option key={member.Id} value={member.initials}>
                       {member.initials} | {member.lastname}
                     </option>

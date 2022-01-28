@@ -10,6 +10,7 @@ import {
   Td,
   Link,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import {
   getRXMedians,
@@ -23,38 +24,66 @@ import { EditIcon, CheckIcon, DeleteIcon } from "@chakra-ui/icons";
 import { ConfirmModal, Input, AddSettingsModal, Select } from ".";
 
 const FOXSettings = () => {
+  const toast = useToast();
   const [rxMedians, setRxMedians] = useState([]);
   const [msgoriginators, setMsgoriginators] = useState([]);
   const [reportingCMDs, setReportingCMDs] = useState([]);
 
   const fetchRXMedians = async () => {
-    const response = await getRXMedians("fox");
-    const formReadyMedians = response.map((item) => ({
-      ...item,
-      isEditable: false,
-    }));
+    try {
+      const response = await getRXMedians("fox");
+      const formReadyMedians = response?.map((item) => ({
+        ...item,
+        isEditable: false,
+      }));
 
-    setRxMedians(formReadyMedians);
+      setRxMedians(formReadyMedians);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchMSGOriginators = async () => {
-    const response = await getMSGOriginators("fox");
-    const formReadyOriginators = response.map((item) => ({
-      ...item,
-      isEditable: false,
-    }));
+    try {
+      const response = await getMSGOriginators("fox");
+      const formReadyOriginators = response.map((item) => ({
+        ...item,
+        isEditable: false,
+      }));
 
-    setMsgoriginators(formReadyOriginators);
+      setMsgoriginators(formReadyOriginators);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchReportingCMDs = async () => {
-    const response = await getReportingCMD();
-    const formReadyCMD = response.map((item) => ({
-      ...item,
-      isEditable: false,
-    }));
+    try {
+      const response = await getReportingCMD();
+      const formReadyCMD = response.map((item) => ({
+        ...item,
+        isEditable: false,
+      }));
 
-    setReportingCMDs(formReadyCMD);
+      setReportingCMDs(formReadyCMD);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleEditField = (Id, field, value) => {
@@ -76,236 +105,358 @@ const FOXSettings = () => {
   };
 
   const toggleRXItemEditable = async (Id) => {
-    const updatedMedianItem = rxMedians.find((median) => median.Id === Id);
-    if (updatedMedianItem.isEditable) {
-      const formattedMedianItem = {
-        Id: updatedMedianItem.Id,
-        name: updatedMedianItem.name,
-        typediff: updatedMedianItem.typediff,
-        default: updatedMedianItem.default,
-      };
-      const response = await updateListItem("rxmedian", formattedMedianItem);
+    try {
+      const updatedMedianItem = rxMedians.find((median) => median.Id === Id);
+      if (updatedMedianItem.isEditable) {
+        const formattedMedianItem = {
+          Id: updatedMedianItem.Id,
+          name: updatedMedianItem.name,
+          typediff: updatedMedianItem.typediff,
+          default: updatedMedianItem.default,
+        };
+        const response = await updateListItem("rxmedian", formattedMedianItem);
+      }
+      setRxMedians((prevMedians) =>
+        prevMedians.map((median) =>
+          median.Id === Id
+            ? { ...median, isEditable: !median.isEditable }
+            : median
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
     }
-    setRxMedians((prevMedians) =>
-      prevMedians.map((median) =>
-        median.Id === Id
-          ? { ...median, isEditable: !median.isEditable }
-          : median
-      )
-    );
   };
 
   const handleAddRxMedian = async (rxMedian) => {
-    const formattedMedian = {
-      ...rxMedian,
-      typediff: "fox",
-    };
-    const response = await insertIntoList("rxmedian", formattedMedian);
-    const newMedian = {
-      ...rxMedian,
-      default: "false",
-      isEditable: false,
-      Id: response,
-    };
-    setRxMedians((prevMedians) => [...prevMedians, newMedian]);
+    try {
+      const formattedMedian = {
+        ...rxMedian,
+        typediff: "fox",
+      };
+      const response = await insertIntoList("rxmedian", formattedMedian);
+      const newMedian = {
+        ...rxMedian,
+        default: "false",
+        isEditable: false,
+        Id: response,
+      };
+      setRxMedians((prevMedians) => [...prevMedians, newMedian]);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleSetDefaultRxMedian = async (name) => {
-    const updatedRxMedian = rxMedians.find((median) => median.name === name);
-    const formattedMedian = {
-      Id: updatedRxMedian.Id,
-      name: updatedRxMedian.name,
-      typediff: updatedRxMedian.typediff,
-      default: "true",
-    };
+    try {
+      const updatedRxMedian = rxMedians.find((median) => median.name === name);
+      const formattedMedian = {
+        Id: updatedRxMedian.Id,
+        name: updatedRxMedian.name,
+        typediff: updatedRxMedian.typediff,
+        default: "true",
+      };
 
-    const formerDefaultMedian = rxMedians.find(
-      (median) => median.default === "true"
-    );
-    const formattedFormerDefaultMedian = {
-      Id: formerDefaultMedian?.Id,
-      name: formerDefaultMedian?.name,
-      typediff: formerDefaultMedian?.typediff,
-      default: "false",
-    };
+      const formerDefaultMedian = rxMedians.find(
+        (median) => median.default === "true"
+      );
+      const formattedFormerDefaultMedian = {
+        Id: formerDefaultMedian?.Id,
+        name: formerDefaultMedian?.name,
+        typediff: formerDefaultMedian?.typediff,
+        default: "false",
+      };
 
-    const response = await updateListItem("rxmedian", formattedMedian);
-    if (formerDefaultMedian !== undefined)
-      await updateListItem("rxmedian", formattedFormerDefaultMedian);
+      const response = await updateListItem("rxmedian", formattedMedian);
+      if (formerDefaultMedian !== undefined)
+        await updateListItem("rxmedian", formattedFormerDefaultMedian);
 
-    setRxMedians((prevMedians) =>
-      prevMedians.map((median) =>
-        median.Id === updatedRxMedian.Id
-          ? { ...median, default: "true" }
-          : { ...median, default: "false" }
-      )
-    );
+      setRxMedians((prevMedians) =>
+        prevMedians.map((median) =>
+          median.Id === updatedRxMedian.Id
+            ? { ...median, default: "true" }
+            : { ...median, default: "false" }
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDeleteRxMedian = async (Id) => {
-    const response = await removeFromList("rxmedian", Id);
-    setRxMedians((prevMedians) => prevMedians.filter((item) => item.Id !== Id));
+    try {
+      setRxMedians((prevMedians) =>
+        prevMedians.filter((item) => item.Id !== Id)
+      );
+      const response = await removeFromList("rxmedian", Id);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const toggleMSGItemEditable = async (Id) => {
-    const updatedOriginatorItem = msgoriginators.find(
-      (originator) => originator.Id === Id
-    );
-    if (updatedOriginatorItem.isEditable) {
-      const formattedOriginatorItem = {
-        Id: updatedOriginatorItem.Id,
-        name: updatedOriginatorItem.name,
-        default: updatedOriginatorItem.default,
-        typediff: updatedOriginatorItem.typediff,
-      };
-      const response = await updateListItem(
-        "msgoriginator",
-        formattedOriginatorItem
+    try {
+      const updatedOriginatorItem = msgoriginators.find(
+        (originator) => originator.Id === Id
       );
+      if (updatedOriginatorItem.isEditable) {
+        const formattedOriginatorItem = {
+          Id: updatedOriginatorItem.Id,
+          name: updatedOriginatorItem.name,
+          default: updatedOriginatorItem.default,
+          typediff: updatedOriginatorItem.typediff,
+        };
+        const response = await updateListItem(
+          "msgoriginator",
+          formattedOriginatorItem
+        );
+      }
+      setMsgoriginators((prevOriginators) =>
+        prevOriginators.map((originator) =>
+          originator.Id === Id
+            ? { ...originator, isEditable: !originator.isEditable }
+            : originator
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
     }
-    setMsgoriginators((prevOriginators) =>
-      prevOriginators.map((originator) =>
-        originator.Id === Id
-          ? { ...originator, isEditable: !originator.isEditable }
-          : originator
-      )
-    );
   };
 
   const handleAddMSGOriginator = async (msgOriginator) => {
-    const formattedOriginator = {
-      ...msgOriginator,
-      typediff: "fox",
-    };
-    const response = await insertIntoList("msgoriginator", formattedOriginator);
-    const newOriginator = {
-      ...msgOriginator,
-      default: "false",
-      isEditable: false,
-      Id: response,
-    };
-    setMsgoriginators((prevOriginators) => [...prevOriginators, newOriginator]);
+    try {
+      const formattedOriginator = {
+        ...msgOriginator,
+        typediff: "fox",
+      };
+      const newOriginator = {
+        ...msgOriginator,
+        default: "false",
+        isEditable: false,
+        Id: response,
+      };
+      setMsgoriginators((prevOriginators) => [
+        ...prevOriginators,
+        newOriginator,
+      ]);
+      const response = await insertIntoList(
+        "msgoriginator",
+        formattedOriginator
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleSetDefaultMSGOriginator = async (name) => {
-    const updatedMSGOriginator = msgoriginators.find(
-      (originator) => originator.name === name
-    );
-    const formattedOriginator = {
-      Id: updatedMSGOriginator.Id,
-      name: updatedMSGOriginator.name,
-      default: "true",
-      typediff: updatedMSGOriginator.typediff,
-    };
+    try {
+      const updatedMSGOriginator = msgoriginators.find(
+        (originator) => originator.name === name
+      );
+      const formattedOriginator = {
+        Id: updatedMSGOriginator.Id,
+        name: updatedMSGOriginator.name,
+        default: "true",
+        typediff: updatedMSGOriginator.typediff,
+      };
 
-    const formerDefaultOriginator = msgoriginators.find(
-      (originator) => originator.default === "true"
-    );
-    const formattedFormerDefaultOriginator = {
-      Id: formerDefaultOriginator?.Id,
-      name: formerDefaultOriginator?.name,
-      default: "false",
-      typediff: formerDefaultOriginator?.typediff,
-    };
+      const formerDefaultOriginator = msgoriginators.find(
+        (originator) => originator.default === "true"
+      );
+      const formattedFormerDefaultOriginator = {
+        Id: formerDefaultOriginator?.Id,
+        name: formerDefaultOriginator?.name,
+        default: "false",
+        typediff: formerDefaultOriginator?.typediff,
+      };
 
-    const response = await updateListItem("msgoriginator", formattedOriginator);
-    if (formerDefaultOriginator !== undefined)
-      await updateListItem("msgoriginator", formattedFormerDefaultOriginator);
+      const response = await updateListItem(
+        "msgoriginator",
+        formattedOriginator
+      );
+      if (formerDefaultOriginator !== undefined)
+        await updateListItem("msgoriginator", formattedFormerDefaultOriginator);
 
-    setMsgoriginators((prevOriginators) =>
-      prevOriginators.map((originator) =>
-        originator.Id === updatedMSGOriginator.Id
-          ? { ...originator, default: "true" }
-          : { ...originator, default: "false" }
-      )
-    );
+      setMsgoriginators((prevOriginators) =>
+        prevOriginators.map((originator) =>
+          originator.Id === updatedMSGOriginator.Id
+            ? { ...originator, default: "true" }
+            : { ...originator, default: "false" }
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDeleteMSGOriginator = async (Id) => {
-    const response = await removeFromList("msgoriginator", Id);
-    setMsgoriginators((prevOriginators) =>
-      prevOriginators.filter((item) => item.Id !== Id)
-    );
+    try {
+      setMsgoriginators((prevOriginators) =>
+        prevOriginators.filter((item) => item.Id !== Id)
+      );
+      const response = await removeFromList("msgoriginator", Id);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleSetDefaultReportingCMD = async (name) => {
-    const updatedReportingCMD = reportingCMDs.find(
-      (reportingCMD) => reportingCMD.name === name
-    );
-    const formattedReportingCMD = {
-      Id: updatedReportingCMD.Id,
-      name: updatedReportingCMD.name,
-      default: "true",
-    };
+    try {
+      const updatedReportingCMD = reportingCMDs.find(
+        (reportingCMD) => reportingCMD.name === name
+      );
+      const formattedReportingCMD = {
+        Id: updatedReportingCMD.Id,
+        name: updatedReportingCMD.name,
+        default: "true",
+      };
 
-    const formerDefaultReportingCMD = reportingCMDs.find(
-      (reportingCMD) => reportingCMD.default === "true"
-    );
-    const formattedFormerDefaultReportingCMD = {
-      Id: formerDefaultReportingCMD?.Id,
-      name: formerDefaultReportingCMD?.name,
-      default: "false",
-    };
+      const formerDefaultReportingCMD = reportingCMDs.find(
+        (reportingCMD) => reportingCMD.default === "true"
+      );
+      const formattedFormerDefaultReportingCMD = {
+        Id: formerDefaultReportingCMD?.Id,
+        name: formerDefaultReportingCMD?.name,
+        default: "false",
+      };
 
-    const response = await updateListItem(
-      "reportingcmd",
-      formattedReportingCMD
-    );
-    if (formattedFormerDefaultReportingCMD !== undefined)
-      await updateListItem("reportingcmd", formattedFormerDefaultReportingCMD);
+      const response = await updateListItem(
+        "reportingcmd",
+        formattedReportingCMD
+      );
+      if (formattedFormerDefaultReportingCMD !== undefined)
+        await updateListItem(
+          "reportingcmd",
+          formattedFormerDefaultReportingCMD
+        );
 
-    setReportingCMDs((prevReportingCMDs) =>
-      prevReportingCMDs.map((reportingCMD) =>
-        reportingCMD.Id === updatedReportingCMD.Id
-          ? { ...reportingCMD, default: "true" }
-          : { ...reportingCMD, default: "false" }
-      )
-    );
+      setReportingCMDs((prevReportingCMDs) =>
+        prevReportingCMDs.map((reportingCMD) =>
+          reportingCMD.Id === updatedReportingCMD.Id
+            ? { ...reportingCMD, default: "true" }
+            : { ...reportingCMD, default: "false" }
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const toggleReportingCMDItemEditable = async (Id) => {
-    const updatedReportingCMDItem = reportingCMDs.find(
-      (reportingCMD) => reportingCMD.Id === Id
-    );
-    if (updatedReportingCMDItem.isEditable) {
-      const formattedReportingCMDItem = {
-        Id: updatedReportingCMDItem.Id,
-        name: updatedReportingCMDItem.name,
-        default: updatedReportingCMDItem.default,
-      };
-      const response = await updateListItem(
-        "reportingcmd",
-        formattedReportingCMDItem
+    try {
+      const updatedReportingCMDItem = reportingCMDs.find(
+        (reportingCMD) => reportingCMD.Id === Id
       );
+      if (updatedReportingCMDItem.isEditable) {
+        const formattedReportingCMDItem = {
+          Id: updatedReportingCMDItem.Id,
+          name: updatedReportingCMDItem.name,
+          default: updatedReportingCMDItem.default,
+        };
+        const response = await updateListItem(
+          "reportingcmd",
+          formattedReportingCMDItem
+        );
+      }
+      setReportingCMDs((prevReportingCMDs) =>
+        prevReportingCMDs.map((reportingCMD) =>
+          reportingCMD.Id === Id
+            ? { ...reportingCMD, isEditable: !reportingCMD.isEditable }
+            : reportingCMD
+        )
+      );
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
     }
-    setReportingCMDs((prevReportingCMDs) =>
-      prevReportingCMDs.map((reportingCMD) =>
-        reportingCMD.Id === Id
-          ? { ...reportingCMD, isEditable: !reportingCMD.isEditable }
-          : reportingCMD
-      )
-    );
   };
 
   const handleAddReportingCMD = async (reportingCMD) => {
-    const response = await insertIntoList("reportingcmd", reportingCMD);
-    const newReportingCMD = {
-      ...reportingCMD,
-      default: "false",
-      isEditable: false,
-      Id: response,
-    };
-    setReportingCMDs((prevReportingCMDs) => [
-      ...prevReportingCMDs,
-      newReportingCMD,
-    ]);
+    try {
+      const response = await insertIntoList("reportingcmd", reportingCMD);
+      const newReportingCMD = {
+        ...reportingCMD,
+        default: "false",
+        isEditable: false,
+        Id: response,
+      };
+      setReportingCMDs((prevReportingCMDs) => [
+        ...prevReportingCMDs,
+        newReportingCMD,
+      ]);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDeleteReportingCMD = async (Id) => {
-    const response = await removeFromList("reportingcmd", Id);
-    setReportingCMDs((prevReportingCMDs) =>
-      prevReportingCMDs.filter((item) => item.Id !== Id)
-    );
+    try {
+      setReportingCMDs((prevReportingCMDs) =>
+        prevReportingCMDs.filter((item) => item.Id !== Id)
+      );
+      const response = await removeFromList("reportingcmd", Id);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const addRXMedianParams = {
@@ -347,10 +498,16 @@ const FOXSettings = () => {
     onSubmit: handleAddReportingCMD,
   };
 
+  const loadSettings = async () => {
+    await Promise.all([
+      await fetchMSGOriginators(),
+      await fetchRXMedians(),
+      await fetchReportingCMDs(),
+    ]);
+  };
+
   useEffect(() => {
-    fetchMSGOriginators();
-    fetchRXMedians();
-    fetchReportingCMDs();
+    loadSettings();
   }, []);
 
   return (

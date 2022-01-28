@@ -20,6 +20,7 @@ import {
   HStack,
   Grid,
   Box,
+  useToast,
 } from "@chakra-ui/react";
 import { Select, Input, Textarea, StationStatus } from "..";
 import { getShiftPersonnel, getStations, updateListItem } from "../../api";
@@ -27,27 +28,47 @@ import dayjs from "dayjs";
 
 const StnNote = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [error, setError] = useState("");
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(true);
   const [selectedStation, setSelectedStation] = useState(null);
   const [shiftMembers, setShiftMembers] = useState([]);
   const [formData, setFormData] = useState({
     category: "STN NOTE - __",
     zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+    time: "",
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
 
   const fetchShiftMembers = async () => {
-    const shiftMembers = await getShiftPersonnel(shift ? shift : "");
-    setShiftMembers(shiftMembers);
+    try {
+      const shiftMembers = await getShiftPersonnel(shift ? shift : "");
+      setShiftMembers(shiftMembers);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchStations = async () => {
-    const stations = await getStations();
-    setStations(stations);
+    try {
+      const stations = await getStations();
+      setStations(stations);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleStationChange = (changedStation, e, name) => {
@@ -89,36 +110,45 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
     if (!formData.category) return setError("You must enter a category.");
     setLoading(true);
 
-    const entryObj = {
-      ...formData,
-      zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
-    };
+    try {
+      const entryObj = {
+        ...formData,
+        zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
+      };
 
-    const newStation = {
-      Id: selectedStation.Id,
-      station: selectedStation.station,
-      name: selectedStation.name,
-      stratdesc: selectedStation.stratdesc,
-      stratcolor: selectedStation.stratcolor,
-      scansdesc: selectedStation.scansdesc,
-      scanscolor: selectedStation.scanscolor,
-      aledesc: selectedStation.aledesc,
-      alecolor: selectedStation.alecolor,
-      dtmfdesc: selectedStation.dtmfdesc,
-      dtmfcolor: selectedStation.dtmfcolor,
-      otherdesc: selectedStation.otherdesc,
-    };
-    await updateListItem("stations", newStation);
+      const newStation = {
+        Id: selectedStation.Id,
+        station: selectedStation.station,
+        name: selectedStation.name,
+        stratdesc: selectedStation.stratdesc,
+        stratcolor: selectedStation.stratcolor,
+        scansdesc: selectedStation.scansdesc,
+        scanscolor: selectedStation.scanscolor,
+        aledesc: selectedStation.aledesc,
+        alecolor: selectedStation.alecolor,
+        dtmfdesc: selectedStation.dtmfdesc,
+        dtmfcolor: selectedStation.dtmfcolor,
+        otherdesc: selectedStation.otherdesc,
+      };
+      await updateListItem("stations", newStation);
 
-    await onSubmit(entryObj);
+      await onSubmit(entryObj);
 
-    setFormData({
-      ...formData,
-      category: "STN NOTE - __",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
-      action: "",
-    });
+      setFormData({
+        ...formData,
+        category: "STN NOTE - __",
+        zuluDate: dayjs().format("YYYY-MM-DD"),
+        time: dayjs().format("HHmm"),
+        action: "",
+      });
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
 
     setLoading(false);
     onClose();
@@ -129,9 +159,13 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
     setLoading(false);
   };
 
+  const loadFormBuilder = async () => {
+    await Promise.all([await fetchShiftMembers(), await fetchStations()]);
+    setFormLoading(false);
+  };
+
   useEffect(() => {
-    fetchShiftMembers();
-    fetchStations();
+    loadFormBuilder();
   }, []);
 
   useEffect(() => {
@@ -153,19 +187,10 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
     formData.operatorInitials,
   ]);
 
-  useEffect(() => {
-    setFormData({
-      ...formData,
-      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
-      operatorInitials: actionEntry.operatorInitials,
-    });
-  }, [actionEntry]);
-
   return (
     <>
-      <Button onClick={onOpen} colorScheme="green">
-        Form Builder
+      <Button onClick={onOpen} isDisabled={formLoading} colorScheme="green">
+        {formLoading ? <Spinner /> : "Form Builder"}
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -222,7 +247,7 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
                     name="operatorInitials"
                     onChange={handleDataChange}
                   >
-                    {shiftMembers.map((member) => (
+                    {shiftMembers?.map((member) => (
                       <option key={member.Id} value={member.initials}>
                         {member.initials} | {member.lastname}
                       </option>
@@ -239,7 +264,7 @@ const StnNote = ({ shift, actionEntry, onSubmit }) => {
                     onChange={handleDataChange}
                     placeholder="Select station"
                   >
-                    {stations.map((station) => (
+                    {stations?.map((station) => (
                       <option key={station.Id} value={station.station}>
                         {station.station}
                       </option>

@@ -23,6 +23,7 @@ import {
   GridItem,
   Spinner,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { Select, Input, Textarea } from "..";
 import {
@@ -36,13 +37,14 @@ import {
   getBroadcastingSchedule,
 } from "../../api";
 import dayjs from "dayjs";
-import { v4 as uuidv4 } from "uuid";
 
 const NuEAM = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [shiftMembers, setShiftMembers] = useState([]);
   const [currentMncs, setCurrentMncs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(true);
   const [stations, setStations] = useState([]);
   const [rxMedians, setRxMedians] = useState([]);
   const [msgOriginators, setMsgOriginators] = useState([]);
@@ -51,7 +53,7 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
   const [formData, setFormData] = useState({
     category: "NU EAM",
     zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+    time: "",
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
@@ -62,96 +64,162 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
   const [error, setError] = useState(null);
 
   const fetchShiftMembers = async () => {
-    const shiftMembers = await getShiftPersonnel(shift ? shift : "");
-    setShiftMembers(shiftMembers);
+    try {
+      const shiftMembers = await getShiftPersonnel(shift ? shift : "");
+      setShiftMembers(shiftMembers);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchMNCSSchedule = async () => {
-    const mncsSchedule = await getMNCSSchedule();
-    const currentMonth = dayjs().get("month") + 1;
+    try {
+      const mncsSchedule = await getMNCSSchedule();
+      const currentMonth = dayjs().get("month") + 1;
 
-    const ancsSchedule = mncsSchedule
-      .find((mncs) => mncs.ncs === "ANCS")
-      .months.split(",");
+      const ancsSchedule = mncsSchedule
+        .find((mncs) => mncs.ncs === "ANCS")
+        .months.split(",");
 
-    const isAncsCurrent = ancsSchedule.indexOf(currentMonth.toString()) !== -1;
-    setCurrentMncs(isAncsCurrent ? "ANCS" : "GFNCS");
+      const isAncsCurrent =
+        ancsSchedule.indexOf(currentMonth.toString()) !== -1;
+      setCurrentMncs(isAncsCurrent ? "ANCS" : "GFNCS");
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchStations = async () => {
-    const stations = await getStations();
-    setStations(stations);
+    try {
+      const stations = await getStations();
+      setStations(stations);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchRxMedians = async () => {
-    const rxMedianList = await getRXMedians("eam");
-    setRxMedians(rxMedianList);
+    try {
+      const rxMedianList = await getRXMedians("eam");
+      setRxMedians(rxMedianList);
 
-    const defaultRx = rxMedianList.find((median) => median.default === "true");
-    setEamData((prevEamData) => ({
-      ...prevEamData,
-      rxMedian: defaultRx ? defaultRx.name : "",
-    }));
+      const defaultRx = rxMedianList.find(
+        (median) => median.default === "true"
+      );
+      setEamData((prevEamData) => ({
+        ...prevEamData,
+        rxMedian: defaultRx ? defaultRx.name : "",
+      }));
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchMSGOriginators = async () => {
-    const msgOriginatorList = await getMSGOriginators("eam");
-    setMsgOriginators(msgOriginatorList);
+    try {
+      const msgOriginatorList = await getMSGOriginators("eam");
+      setMsgOriginators(msgOriginatorList);
 
-    const defaultMsg = msgOriginatorList.find(
-      (originator) => originator.default === "true"
-    );
-    setEamData((prevEamData) => ({
-      ...prevEamData,
-      msgOriginator: defaultMsg ? defaultMsg.name : "",
-    }));
+      const defaultMsg = msgOriginatorList.find(
+        (originator) => originator.default === "true"
+      );
+      setEamData((prevEamData) => ({
+        ...prevEamData,
+        msgOriginator: defaultMsg ? defaultMsg.name : "",
+      }));
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchReportingCMD = async () => {
-    const reportingCMD = await getReportingCMD();
-    setReportingCMDs(reportingCMD);
+    try {
+      const reportingCMD = await getReportingCMD();
+      setReportingCMDs(reportingCMD);
 
-    const defaultCMD = reportingCMD.find((cmd) => cmd.default === "true");
-    setEamData((prevEamData) => ({
-      ...prevEamData,
-      reportingCMD: defaultCMD ? defaultCMD.name : "",
-    }));
+      const defaultCMD = reportingCMD.find((cmd) => cmd.default === "true");
+      setEamData((prevEamData) => ({
+        ...prevEamData,
+        reportingCMD: defaultCMD ? defaultCMD.name : "",
+      }));
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchBroadcastingSchedule = async () => {
-    const broadcastingSchedule = await getBroadcastingSchedule();
-    const formattedBroadcastSchedule = broadcastingSchedule
-      .map((schedule) => ({
-        time: schedule.time,
-        ncs: schedule.ncs,
-        Id: schedule.Id,
-      }))
-      .sort((a, b) => (a.time > b.time ? 1 : -1));
+    try {
+      const broadcastingSchedule = await getBroadcastingSchedule();
+      const formattedBroadcastSchedule = broadcastingSchedule
+        .map((schedule) => ({
+          time: schedule.time,
+          ncs: schedule.ncs,
+          Id: schedule.Id,
+        }))
+        .sort((a, b) => (a.time > b.time ? 1 : -1));
 
-    const currentTime = dayjs().format("HHmm");
+      const currentTime = dayjs().format("HHmm");
 
-    for (let i = 0; i < formattedBroadcastSchedule.length; i++) {
-      if (
-        currentTime > formattedBroadcastSchedule[i].time &&
-        currentTime < formattedBroadcastSchedule[i + 1].time
-      ) {
-        setEamData((prevEamData) => ({
-          ...prevEamData,
-          txNcs: formattedBroadcastSchedule[i].ncs,
-        }));
-        break;
+      for (let i = 0; i < formattedBroadcastSchedule.length; i++) {
+        if (
+          currentTime > formattedBroadcastSchedule[i].time &&
+          currentTime < formattedBroadcastSchedule[i + 1].time
+        ) {
+          setEamData((prevEamData) => ({
+            ...prevEamData,
+            txNcs: formattedBroadcastSchedule[i].ncs,
+          }));
+          break;
+        }
+
+        if (
+          currentTime > formattedBroadcastSchedule[i].time &&
+          formattedBroadcastSchedule[i + 1] === undefined
+        ) {
+          setEamData((prevEamData) => ({
+            ...prevEamData,
+            txNcs: formattedBroadcastSchedule[i].ncs,
+          }));
+          break;
+        }
       }
-
-      if (
-        currentTime > formattedBroadcastSchedule[i].time &&
-        formattedBroadcastSchedule[i + 1] === undefined
-      ) {
-        setEamData((prevEamData) => ({
-          ...prevEamData,
-          txNcs: formattedBroadcastSchedule[i].ncs,
-        }));
-        break;
-      }
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
     }
   };
 
@@ -208,32 +276,41 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
     if (!formData.category) return setError("You must enter a category.");
     setLoading(true);
 
-    const entryObj = {
-      ...formData,
-      zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
-    };
+    try {
+      const entryObj = {
+        ...formData,
+        zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
+      };
 
-    Promise.all(
-      stations.map(async (station) => {
-        const newStation = {
-          Id: station.Id,
-          observation: station.observation,
-        };
+      Promise.all(
+        stations.map(async (station) => {
+          const newStation = {
+            Id: station.Id,
+            observation: station.observation,
+          };
 
-        await updateListItem("stations", newStation);
+          await updateListItem("stations", newStation);
 
-        return newStation;
-      })
-    );
+          return newStation;
+        })
+      );
 
-    await onSubmit(entryObj);
+      await onSubmit(entryObj);
 
-    setFormData({
-      ...formData,
-      category: "NU EAM",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
-    });
+      setFormData({
+        ...formData,
+        category: "NU EAM",
+        zuluDate: dayjs().format("YYYY-MM-DD"),
+        time: dayjs().format("HHmm"),
+      });
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
 
     setLoading(false);
     onClose();
@@ -244,14 +321,21 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
     setLoading(false);
   };
 
+  const loadFormBuilder = async () => {
+    await Promise.all([
+      await fetchShiftMembers(),
+      await fetchMNCSSchedule(),
+      await fetchStations(),
+      await fetchRxMedians(),
+      await fetchMSGOriginators(),
+      await fetchReportingCMD(),
+      await fetchBroadcastingSchedule(),
+    ]);
+    setFormLoading(false);
+  };
+
   useEffect(() => {
-    fetchShiftMembers();
-    fetchMNCSSchedule();
-    fetchStations();
-    fetchRxMedians();
-    fetchMSGOriginators();
-    fetchReportingCMD();
-    fetchBroadcastingSchedule();
+    loadFormBuilder();
   }, []);
 
   useEffect(() => {
@@ -281,19 +365,10 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
     }));
   }, [eamData, stations]);
 
-  useEffect(() => {
-    setFormData({
-      ...formData,
-      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
-      operatorInitials: actionEntry.operatorInitials,
-    });
-  }, [actionEntry]);
-
   return (
     <>
-      <Button onClick={onOpen} colorScheme="green">
-        Form Builder
+      <Button onClick={onOpen} isDisabled={formLoading} colorScheme="green">
+        {formLoading ? <Spinner /> : "Form Builder"}
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -356,7 +431,7 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
                       onChange={handleDataChange}
                       size="sm"
                     >
-                      {shiftMembers.map((member) => (
+                      {shiftMembers?.map((member) => (
                         <option key={member.Id} value={member.initials}>
                           {member.initials} | {member.lastname}
                         </option>
@@ -457,7 +532,7 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
                       onChange={handleEAMDataChange}
                       size="sm"
                     >
-                      {rxMedians.map((median) => (
+                      {rxMedians?.map((median) => (
                         <option key={median.Id} value={median.name}>
                           {median.name}
                         </option>
@@ -474,7 +549,7 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
                       onChange={handleEAMDataChange}
                       size="sm"
                     >
-                      {msgOriginators.map((originator) => (
+                      {msgOriginators?.map((originator) => (
                         <option key={originator.Id} value={originator.name}>
                           {originator.name}
                         </option>
@@ -544,7 +619,7 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
                       onChange={handleEAMDataChange}
                       size="sm"
                     >
-                      {shiftMembers.map((member) => (
+                      {shiftMembers?.map((member) => (
                         <option key={member.Id} value={member.initials}>
                           {member.initials} | {member.lastname}
                         </option>
@@ -559,7 +634,7 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
                       onChange={handleEAMDataChange}
                       size="sm"
                     >
-                      {shiftMembers.map((member) => (
+                      {shiftMembers?.map((member) => (
                         <option key={member.Id} value={member.initials}>
                           {member.initials} | {member.lastname}
                         </option>
@@ -618,7 +693,7 @@ const NuEAM = ({ shift, actionEntry, onSubmit }) => {
                   <GridItem colSpan={2}>
                     Station Broadcast Observations
                   </GridItem>
-                  {stations.map((station) => (
+                  {stations?.map((station) => (
                     <>
                       <GridItem>
                         <Text>{station.station}</Text>

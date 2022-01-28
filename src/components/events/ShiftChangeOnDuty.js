@@ -23,6 +23,7 @@ import {
   Box,
   Text,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import { Select, Input, Textarea } from "..";
@@ -37,10 +38,12 @@ import { v4 as uuidv4 } from "uuid";
 
 const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [shiftMembers, setShiftMembers] = useState([]);
   const [shopMembers, setShopMembers] = useState([]);
   const [status, setStatus] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(true);
   const [currentMncs, setCurrentMncs] = useState([]);
   const [comsecInitials, setComsecInitials] = useState({
     operator: "",
@@ -49,37 +52,74 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
   const [formData, setFormData] = useState({
     category: "SHIFT CHANGE (ON DUTY)",
     zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+    time: "",
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
   const [error, setError] = useState(null);
 
   const fetchShiftMembers = async () => {
-    const shiftMembers = await getShiftPersonnel(shift ? shift : "");
-    setShiftMembers(shiftMembers);
+    try {
+      const shiftMembers = await getShiftPersonnel(shift ? shift : "");
+      setShiftMembers(shiftMembers);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchStatus = async () => {
-    const status = await getPersonnelStatus();
-    setStatus(status);
+    try {
+      const status = await getPersonnelStatus();
+      setStatus(status);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchMNCSSchedule = async () => {
-    const mncsSchedule = await getMNCSSchedule();
-    const currentMonth = dayjs().get("month") + 1;
+    try {
+      const mncsSchedule = await getMNCSSchedule();
+      const currentMonth = dayjs().get("month") + 1;
 
-    const ancsSchedule = mncsSchedule
-      .find((mncs) => mncs.ncs === "ANCS")
-      .months.split(",");
+      const ancsSchedule = mncsSchedule
+        .find((mncs) => mncs.ncs === "ANCS")
+        .months.split(",");
 
-    const isAncsCurrent = ancsSchedule.indexOf(currentMonth.toString()) !== -1;
-    setCurrentMncs(isAncsCurrent ? "ANCS" : "GFNCS");
+      const isAncsCurrent =
+        ancsSchedule.indexOf(currentMonth.toString()) !== -1;
+      setCurrentMncs(isAncsCurrent ? "ANCS" : "GFNCS");
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchAllMembers = async () => {
-    const allMembers = await getShiftPersonnel();
-    setShopMembers(allMembers);
+    try {
+      const allMembers = await getShiftPersonnel();
+      setShopMembers(allMembers);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDataChange = (e) => {
@@ -124,7 +164,16 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
         status: e.target.value,
       };
 
-      await updateListItem("personnel", formattedUpdatedMember);
+      try {
+        await updateListItem("personnel", formattedUpdatedMember);
+      } catch (error) {
+        toast({
+          title: `An error occured: ${error.message}`,
+          status: "error",
+          isClosable: true,
+          position: "top",
+        });
+      }
     }
   };
 
@@ -164,37 +213,46 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
     if (!formData.category) return setError("You must enter a category.");
     setLoading(true);
 
-    const entryObj = {
-      ...formData,
-      zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
-    };
+    try {
+      const entryObj = {
+        ...formData,
+        zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
+      };
 
-    const note101 = {
-      ...formData,
-      category: "CHKLST NOTE - 101 (START)",
-      action:
-        "(U) OPERATORS HAVE STARTED THEIR SHIFT CHANGE STN OPS CHECKS ATT//",
-      zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
-    };
+      const note101 = {
+        ...formData,
+        category: "CHKLST NOTE - 101 (START)",
+        action:
+          "(U) OPERATORS HAVE STARTED THEIR SHIFT CHANGE STN OPS CHECKS ATT//",
+        zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
+      };
 
-    const note301 = {
-      ...formData,
-      category: "CHKLST NOTE - 301 (START)",
-      action:
-        "(U) COORDINATORS HAVE STARTED THE CROWS NEST SHIFT CHANGE CHECKLIST ATT//",
-      zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
-    };
+      const note301 = {
+        ...formData,
+        category: "CHKLST NOTE - 301 (START)",
+        action:
+          "(U) COORDINATORS HAVE STARTED THE CROWS NEST SHIFT CHANGE CHECKLIST ATT//",
+        zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
+      };
 
-    await onSubmit(entryObj);
-    await onSubmit(note101);
-    await onSubmit(note301);
+      await onSubmit(entryObj);
+      await onSubmit(note101);
+      await onSubmit(note301);
 
-    setFormData({
-      ...formData,
-      category: "SHIFT CHANGE (ON DUTY)",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
-    });
+      setFormData({
+        ...formData,
+        category: "SHIFT CHANGE (ON DUTY)",
+        zuluDate: dayjs().format("YYYY-MM-DD"),
+        time: dayjs().format("HHmm"),
+      });
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
 
     setLoading(false);
     onClose();
@@ -205,11 +263,18 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
     setLoading(false);
   };
 
+  const loadFormBuilder = async () => {
+    await Promise.all([
+      await fetchShiftMembers(),
+      await fetchStatus(),
+      await fetchMNCSSchedule(),
+      await fetchAllMembers(),
+    ]);
+    setFormLoading(false);
+  };
+
   useEffect(() => {
-    fetchShiftMembers();
-    fetchStatus();
-    fetchMNCSSchedule();
-    fetchAllMembers();
+    loadFormBuilder();
   }, []);
 
   useEffect(() => {
@@ -241,19 +306,10 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
     }));
   }, [shiftMembers, currentMncs, comsecInitials]);
 
-  useEffect(() => {
-    setFormData({
-      ...formData,
-      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
-      operatorInitials: actionEntry.operatorInitials,
-    });
-  }, [actionEntry]);
-
   return (
     <>
-      <Button onClick={onOpen} colorScheme="green">
-        Form Builder
+      <Button onClick={onOpen} isDisabled={formLoading} colorScheme="green">
+        {formLoading ? <Spinner /> : "Form Builder"}
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -299,8 +355,8 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
                     onChange={handleDataChange}
                   >
                     {shiftMembers
-                      .filter((e) => e.initials)
-                      .map((member) => (
+                      ?.filter((e) => e.initials)
+                      ?.map((member) => (
                         <option key={member.Id} value={member.initials}>
                           {member.initials} | {member.lastname}
                         </option>
@@ -328,8 +384,8 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
                       placeholder="Select an operator"
                     >
                       {shiftMembers
-                        .filter((e) => e.initials)
-                        .map((member) => (
+                        ?.filter((e) => e.initials)
+                        ?.map((member) => (
                           <option key={member.Id} value={member.initials}>
                             {member.initials} | {member.lastname}
                           </option>
@@ -341,7 +397,7 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
                       value={comsecInitials.all}
                       placeholder="Select an operator"
                     >
-                      {shopMembers.map((member) => (
+                      {shopMembers?.map((member) => (
                         <option key={member.Id} value={member.initials}>
                           {member.initials} | {member.lastname}
                         </option>
@@ -394,7 +450,7 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
                   <GridItem colSpan={2}>
                     <Input isDisabled value={shift} type="text" />
                   </GridItem>
-                  {shiftMembers.map((member, i) => (
+                  {shiftMembers?.map((member, i) => (
                     <React.Fragment key={member.Id}>
                       <GridItem>
                         <FormLabel>Personnel {i + 1}</FormLabel>
@@ -417,7 +473,7 @@ const ShiftChangeOnDuty = ({ shift, actionEntry, onSubmit }) => {
                           placeholder="Select a status"
                           value={member.status}
                         >
-                          {status.map((stat) => (
+                          {status?.map((stat) => (
                             <option key={stat.Id} value={stat.status}>
                               {stat.status}
                             </option>

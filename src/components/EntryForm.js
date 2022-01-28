@@ -32,7 +32,13 @@ import {
   TfcNote,
 } from "./events";
 
-const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
+const EntryForm = ({
+  setActionEntry,
+  actionEntry,
+  onSubmit,
+  shift,
+  changeCalendarDate,
+}) => {
   const [error, setError] = useState("");
   const [formBuilder, setFormBuilder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -304,6 +310,7 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
   const handleDateChange = (e) => {
     setError("");
     setActionEntry((prevEntry) => ({ ...prevEntry, zuluDate: e.target.value }));
+    changeCalendarDate(dayjs(e.target.value).format("MM/DD/YYYY"));
   };
 
   const handleTimeChange = (e) => {
@@ -372,8 +379,7 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
     setActionEntry({
       ...actionEntry,
       category: "",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
+      time: "",
       action: "",
     });
     setFormBuilder(null);
@@ -425,6 +431,7 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
             value={actionEntry.zuluDate}
             type="date"
             isInvalid={error.match("date")}
+            isDisabled={formBuilder !== null}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -445,6 +452,7 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
               value={actionEntry.time}
               type="text"
               isInvalid={error.match("time")}
+              isDisabled={formBuilder !== null}
             />
           </Box>
         </GridItem>
@@ -457,6 +465,7 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
             value={actionEntry.operatorInitials}
             type="text"
             isInvalid={error.match("initials")}
+            isDisabled={formBuilder !== null}
           />
         </GridItem>
         <GridItem colSpan={2}></GridItem>
@@ -468,6 +477,7 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
             isInvalid={error.match("action")}
             onChange={handleActionChange}
             value={actionEntry.action}
+            isDisabled={formBuilder !== null}
           />
         </GridItem>
         <GridItem colSpan={4}>
@@ -485,17 +495,20 @@ const EntryForm = ({ setActionEntry, actionEntry, onSubmit, shift }) => {
             </Alert>
           )}
         </GridItem>
-        {formBuilder && <GridItem colStart={2}>{formBuilder}</GridItem>}
         <GridItem colStart={3}>
-          <Button
-            disabled={loading}
-            onClick={handleSave}
-            mr={2}
-            width="100%"
-            colorScheme="blue"
-          >
-            {loading ? <Spinner size="sm" /> : "Save"}
-          </Button>
+          {formBuilder ? (
+            formBuilder
+          ) : (
+            <Button
+              disabled={loading}
+              onClick={handleSave}
+              mr={2}
+              width="100%"
+              colorScheme="blue"
+            >
+              {loading ? <Spinner size="sm" /> : "Save"}
+            </Button>
+          )}
         </GridItem>
         <GridItem>
           <Button

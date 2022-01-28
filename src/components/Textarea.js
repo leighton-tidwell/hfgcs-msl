@@ -8,6 +8,7 @@ const Textarea = ({
   variant = "outline",
   isInvalid,
   minHeight,
+  isDisabled,
 }) => {
   return (
     <ChakraTextarea
@@ -15,6 +16,7 @@ const Textarea = ({
       value={value}
       onChange={onChange}
       minHeight={minHeight}
+      isDisabled={isDisabled}
       rounded="sm"
       borderColor="blue.700"
       borderWidth="2px"

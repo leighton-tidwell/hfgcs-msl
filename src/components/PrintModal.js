@@ -14,18 +14,23 @@ import {
   Link,
   FormLabel,
   FormControl,
+  useToast,
+  Spinner,
 } from "@chakra-ui/react";
 import { PrintIcon, Input, Select } from ".";
 import { getActionsForDate } from "../api";
 import dayjs from "dayjs";
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
-const PrintModal = () => {
+const PrintModal = ({ selectedDate }) => {
+  console.log(selectedDate);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [eventChoices, setEventChoices] = useState([]);
   const [printableEvents, setPrintableEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    date: dayjs().format("YYYY-MM-DD"),
+    date: dayjs(selectedDate, "MM/DD/YYYY").format("YYYY-MM-DD"),
     startEvent: "",
     endEvent: "",
   });
@@ -34,9 +39,16 @@ const PrintModal = () => {
     header: function (currentPage, pageCount) {
       return {
         table: {
-          widths: ["100%"],
+          widths: ["50%", "50%"],
           body: [
             [
+              {
+                text: "SECRET",
+                fontSize: 8,
+                bold: true,
+                alignment: "right",
+                margin: [45, 25, 0, 0],
+              },
               {
                 text: `PAGE ${currentPage} OF ${pageCount}`,
                 fontSize: 8,
@@ -68,6 +80,16 @@ const PrintModal = () => {
               fontSize: 8,
               margin: [0, 0, 45, 0],
             },
+          ],
+          [
+            {
+              text: "SECRET",
+              fontSize: 8,
+              bold: true,
+              alignment: "right",
+              margin: [45, 0, 0, 0],
+            },
+            {},
           ],
         ],
       },
@@ -152,35 +174,7 @@ const PrintModal = () => {
           widths: ["20%", "10%", "10%", "60%"],
           headerRows: 1,
           // keepWithHeaderRows: 1,
-          body: [
-            [
-              {
-                text: "CHANNEL OR CIRCUIT",
-                alignment: "center",
-                fontSize: 8,
-                bold: true,
-              },
-              {
-                text: "ZULU TIME",
-                fontSize: 8,
-                alignment: "center",
-                bold: true,
-              },
-              {
-                text: "OP INIT",
-                fontSize: 8,
-                alignment: "center",
-                bold: true,
-              },
-              {
-                text: "ACTION/EVENT",
-                alignment: "center",
-                fontSize: 8,
-                bold: true,
-              },
-            ],
-            // INSERT NEW ROWS HERE
-          ],
+          body: [],
         },
       },
     ],
@@ -290,6 +284,33 @@ const PrintModal = () => {
           },
         ]);
 
+        newDoc.content[1].table.body.unshift([
+          {
+            text: "CHANNEL OR CIRCUIT",
+            alignment: "center",
+            fontSize: 8,
+            bold: true,
+          },
+          {
+            text: "ZULU TIME",
+            fontSize: 8,
+            alignment: "center",
+            bold: true,
+          },
+          {
+            text: "OP INIT",
+            fontSize: 8,
+            alignment: "center",
+            bold: true,
+          },
+          {
+            text: "ACTION/EVENT",
+            alignment: "center",
+            fontSize: 8,
+            bold: true,
+          },
+        ]);
+
         return newDoc;
       });
     }
@@ -302,15 +323,26 @@ const PrintModal = () => {
   };
 
   const fetchEvents = async () => {
-    const response = await getActionsForDate(
-      dayjs(formData.date).format("MM/DD/YYYY")
-    );
+    try {
+      const response = await getActionsForDate(
+        dayjs(formData.date).format("MM/DD/YYYY")
+      );
 
-    const sortedResponses = response.sort((a, b) =>
-      a.entrytime > b.entrytime ? 1 : -1
-    );
+      const sortedResponses = response.sort((a, b) => {
+        if (a.entrytime === b.entrytime) return a.Id > b.Id ? 1 : -1;
+        return a.entrytime > b.entrytime ? 1 : -1;
+      });
 
-    setEventChoices(sortedResponses);
+      setEventChoices(sortedResponses);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -322,6 +354,13 @@ const PrintModal = () => {
     });
   }, [formData.date]);
 
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      date: dayjs(selectedDate, "MM/DD/YYYY").format("YYYY-MM-DD"),
+    }));
+  }, [selectedDate]);
+
   return (
     <>
       <Link onClick={onOpen}>
@@ -330,12 +369,13 @@ const PrintModal = () => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent bg="gray.900" color="white">
-          <ModalHeader>Print</ModalHeader>
+          <ModalHeader>Print {loading && <Spinner size="sm" />}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <FormControl mb={2} isRequired>
               <FormLabel>Date</FormLabel>
               <Input
+                isDisabled={loading}
                 onChange={handleEditField}
                 name="date"
                 value={formData.date}
@@ -345,6 +385,7 @@ const PrintModal = () => {
             <FormControl mb={2} isRequired>
               <FormLabel>Start Event</FormLabel>
               <Select
+                isDisabled={loading}
                 onChange={handleEditField}
                 value={formData.startEvent}
                 name="startEvent"
@@ -353,7 +394,7 @@ const PrintModal = () => {
                 {eventChoices.length &&
                   eventChoices.map((event) => (
                     <option key={event.Id + "start"} value={event.Id}>
-                      {event.eventcategory}
+                      {event.eventcategory} - {event.entrytime}Z
                     </option>
                   ))}
               </Select>
@@ -369,14 +410,19 @@ const PrintModal = () => {
                 {eventChoices.length &&
                   eventChoices.map((event) => (
                     <option key={event.Id + "end"} value={event.Id}>
-                      {event.eventcategory}
+                      {event.eventcategory} - {event.entrytime}Z
                     </option>
                   ))}
               </Select>
             </FormControl>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={2} onClick={createPDF}>
+            <Button
+              colorScheme="blue"
+              isDisabled={loading}
+              mr={2}
+              onClick={createPDF}
+            >
               Confirm
             </Button>
             <Button colorScheme="red" onClick={onClose}>

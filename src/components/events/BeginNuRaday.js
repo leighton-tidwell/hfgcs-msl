@@ -23,6 +23,7 @@ import {
   Box,
   Text,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import { Select, Input, Textarea } from "../";
@@ -38,7 +39,9 @@ import { v4 as uuidv4 } from "uuid";
 
 const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(true);
   const [shiftMembers, setShiftMembers] = useState([]);
   const [status, setStatus] = useState([]);
   const [currentMncs, setCurrentMncs] = useState([]);
@@ -46,32 +49,60 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
   const [formData, setFormData] = useState({
     category: "BEGIN NU RADAY",
     zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-    time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
+    time: "",
     operatorInitials: actionEntry.operatorInitials,
     action: "",
   });
   const [error, setError] = useState(null);
 
   const fetchShiftMembers = async () => {
-    const shiftMembers = await getShiftPersonnel(shift ? shift : "");
-    setShiftMembers(shiftMembers);
+    try {
+      const shiftMembers = await getShiftPersonnel(shift ? shift : "");
+      setShiftMembers(shiftMembers);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchStatus = async () => {
-    const status = await getPersonnelStatus();
-    setStatus(status);
+    try {
+      const status = await getPersonnelStatus();
+      setStatus(status);
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const fetchMNCSSchedule = async () => {
-    const mncsSchedule = await getMNCSSchedule();
-    const currentMonth = dayjs().get("month") + 1;
+    try {
+      const mncsSchedule = await getMNCSSchedule();
+      const currentMonth = dayjs().get("month") + 1;
 
-    const ancsSchedule = mncsSchedule
-      .find((mncs) => mncs.ncs === "ANCS")
-      .months.split(",");
+      const ancsSchedule = mncsSchedule
+        .find((mncs) => mncs.ncs === "ANCS")
+        ?.months.split(",");
 
-    const isAncsCurrent = ancsSchedule.indexOf(currentMonth.toString()) !== -1;
-    setCurrentMncs(isAncsCurrent ? "ANCS" : "GFNCS");
+      const isAncsCurrent =
+        ancsSchedule.indexOf(currentMonth.toString()) !== -1;
+      setCurrentMncs(isAncsCurrent ? "ANCS" : "GFNCS");
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleDataChange = (e) => {
@@ -115,32 +146,49 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
         Id: updatedMember.Id,
         status: e.target.value,
       };
-
-      await updateListItem("personnel", formattedUpdatedMember);
+      try {
+        await updateListItem("personnel", formattedUpdatedMember);
+      } catch (error) {
+        toast({
+          title: `An error occured: ${error.message}`,
+          status: "error",
+          isClosable: true,
+          position: "top",
+        });
+      }
     }
   };
 
   const handleFetchPreviousStationStatus = async () => {
-    const previousStationStatus = await getActionsForDate(
-      dayjs().subtract(1, "day").format("MM/DD/YYYY")
-    );
-    const findPreviousStationStatus = previousStationStatus.find(
-      (status) => status.eventcategory === "CHKLST NOTE - 108 (END)"
-    );
-
-    if (Array.isArray(findPreviousStationStatus)) {
-      const sortByTime = findPreviousStationStatus.sort((a, b) =>
-        a.entrytime > b.entrytime ? 1 : -1
+    try {
+      const previousStationStatus = await getActionsForDate(
+        dayjs().subtract(1, "day").format("MM/DD/YYYY")
       );
+      const findPreviousStationStatus = previousStationStatus.find(
+        (status) => status.eventcategory === "CHKLST NOTE - 108 (END)"
+      );
+
+      if (Array.isArray(findPreviousStationStatus)) {
+        const sortByTime = findPreviousStationStatus.sort((a, b) =>
+          a.entrytime > b.entrytime ? 1 : -1
+        );
+        setPreviousStationStatus(
+          sortByTime[sortByTime.length - 1].action.split("ATT/")[1]
+        );
+        return;
+      }
+
       setPreviousStationStatus(
-        sortByTime[sortByTime.length - 1].action.split("ATT/")[1]
+        findPreviousStationStatus?.action?.split("ATT/")[1] || ""
       );
-      return;
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
     }
-
-    setPreviousStationStatus(
-      findPreviousStationStatus?.action?.split("ATT/")[1] || ""
-    );
   };
 
   const handleMNCSChange = (e) => {
@@ -184,16 +232,24 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
       zuluDate: dayjs(formData.zuluDate).format("MM/DD/YYYY"),
       time: dayjs(formData.time, "HHmm").add(1, "minute").format("HHmm"),
     };
+    try {
+      await onSubmit(entryObj);
+      await onSubmit(note603);
 
-    await onSubmit(entryObj);
-    await onSubmit(note603);
-
-    setFormData({
-      ...formData,
-      category: "BEGIN NU RAYDAY",
-      zuluDate: dayjs().format("YYYY-MM-DD"),
-      time: dayjs().format("HHmm"),
-    });
+      setFormData({
+        ...formData,
+        category: "BEGIN NU RAYDAY",
+        zuluDate: dayjs().format("YYYY-MM-DD"),
+        time: dayjs().format("HHmm"),
+      });
+    } catch (error) {
+      toast({
+        title: `An error occured: ${error.message}`,
+        status: "error",
+        isClosable: true,
+        position: "top",
+      });
+    }
 
     setLoading(false);
     onClose();
@@ -204,11 +260,19 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
     setLoading(false);
   };
 
+  const loadFormBuilder = async () => {
+    await Promise.all([
+      await fetchShiftMembers(),
+      await fetchStatus(),
+      await fetchMNCSSchedule(),
+      await handleFetchPreviousStationStatus(),
+    ]);
+
+    setFormLoading(false);
+  };
+
   useEffect(() => {
-    fetchShiftMembers();
-    fetchStatus();
-    fetchMNCSSchedule();
-    handleFetchPreviousStationStatus();
+    loadFormBuilder();
   }, []);
 
   useEffect(() => {
@@ -238,24 +302,17 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
     }));
   }, [shiftMembers, currentMncs, previousStationStatus]);
 
-  useEffect(() => {
-    setFormData({
-      ...formData,
-      zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
-      time: dayjs(actionEntry.time, "HHmm").format("HHmm"),
-      operatorInitials: actionEntry.operatorInitials,
-    });
-  }, [actionEntry]);
-
   return (
     <>
-      <Button onClick={onOpen} colorScheme="green">
-        Form Builder
+      <Button onClick={onOpen} isDisabled={formLoading} colorScheme="green">
+        {formLoading ? <Spinner /> : "Form Builder"}
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent minW="50vw" bg="gray.900" color="white">
-          <ModalHeader>BEGIN NU RADAY</ModalHeader>
+          <ModalHeader>
+            BEGIN NU RADAY {formLoading && <Spinner size="sm" />}
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Stack direction="row" spacing={5}>
@@ -276,6 +333,7 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
                     value={formData.zuluDate}
                     name="zuluDate"
                     type="date"
+                    isDisabled={formLoading}
                   />
                 </FormControl>
                 <FormControl id="time" isRequired>
@@ -285,6 +343,7 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
                     value={formData.time}
                     name="time"
                     type="text"
+                    isDisabled={formLoading}
                   />
                 </FormControl>
                 <FormControl id="op-init" isRequired>
@@ -294,10 +353,11 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
                     placeholder="Select an operator"
                     name="operatorInitials"
                     onChange={handleDataChange}
+                    isDisabled={formLoading}
                   >
                     {shiftMembers
-                      .filter((e) => e.initials)
-                      .map((member) => (
+                      ?.filter((e) => e.initials)
+                      ?.map((member) => (
                         <option key={member.Id} value={member.initials}>
                           {member.initials} | {member.lastname}
                         </option>
@@ -310,6 +370,7 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
                     name="mncs"
                     onChange={handleMNCSChange}
                     value={currentMncs}
+                    isDisabled={formLoading}
                   >
                     <option value="ANCS">ANCS</option>
                     <option value="GFNCS">GFNCS</option>
@@ -318,6 +379,7 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
                 <FormControl id="action" isRequired>
                   <FormLabel>Action/Event</FormLabel>
                   <Textarea
+                    isDisabled={formLoading}
                     onChange={handleDataChange}
                     name="action"
                     type="text"
@@ -344,7 +406,12 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
                   <Text flexGrow="1" fontWeight="bold">
                     Personnel
                   </Text>
-                  <Button onClick={addPersonnel} size="sm" colorScheme="blue">
+                  <Button
+                    isDisabled={formLoading}
+                    onClick={addPersonnel}
+                    size="sm"
+                    colorScheme="blue"
+                  >
                     <AddIcon />
                   </Button>
                 </Box>
@@ -360,7 +427,7 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
                   <GridItem colSpan={2}>
                     <Input isDisabled value={shift} type="text" />
                   </GridItem>
-                  {shiftMembers.map((member, i) => (
+                  {shiftMembers?.map((member, i) => (
                     <React.Fragment key={member.Id}>
                       <GridItem>
                         <FormLabel>Personnel {i + 1}</FormLabel>
@@ -371,6 +438,7 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
                           onChange={(e) =>
                             handleShiftMemberChange(member.Id, e)
                           }
+                          isDisabled={formLoading}
                           value={`${member.rank}-${member.lastname}`}
                         />
                       </GridItem>
@@ -379,11 +447,12 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
                           onChange={(e) =>
                             handleShiftMemberChange(member.Id, e)
                           }
+                          isDisabled={formLoading}
                           name="status"
                           placeholder="Select a status"
                           value={member.status}
                         >
-                          {status.map((stat) => (
+                          {status?.map((stat) => (
                             <option key={stat.Id} value={stat.status}>
                               {stat.status}
                             </option>
@@ -406,7 +475,11 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
             >
               Cancel
             </Button>
-            <Button disabled={loading} colorScheme="blue" onClick={handleSave}>
+            <Button
+              disabled={loading || formLoading}
+              colorScheme="blue"
+              onClick={handleSave}
+            >
               {loading ? <Spinner size="sm" /> : "Save"}
             </Button>
           </ModalFooter>
