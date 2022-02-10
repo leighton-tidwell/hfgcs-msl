@@ -75,7 +75,7 @@ const EntryForm = ({
     },
     {
       id: uuidv4(),
-      name: "CHKLST NOTE - 108 (END)",
+      name: "CHKLST NOTE - 102 (END)",
       component: (
         <Checklist108End
           actionEntry={actionEntry}
@@ -139,7 +139,7 @@ const EntryForm = ({
     },
     {
       id: uuidv4(),
-      name: "CHKLST NOTE - 108 (START)",
+      name: "CHKLST NOTE - 102 (START)",
       component: null,
       template: "(U) OPERATORS HAVE STARTED THEIR 4 HOUR STN OPS CHECKS ATT//",
     },

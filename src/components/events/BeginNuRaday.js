@@ -165,7 +165,7 @@ const BeginNuRaday = ({ shift, actionEntry, onSubmit }) => {
         dayjs().subtract(1, "day").format("MM/DD/YYYY")
       );
       const findPreviousStationStatus = previousStationStatus.find(
-        (status) => status.eventcategory === "CHKLST NOTE - 108 (END)"
+        (status) => status.eventcategory === "CHKLST NOTE - 102 (END)"
       );
 
       if (Array.isArray(findPreviousStationStatus)) {

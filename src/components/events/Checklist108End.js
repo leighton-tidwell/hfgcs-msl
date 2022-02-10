@@ -38,7 +38,7 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
   const [stations, setStations] = useState([]);
   const [toggleStations, setToggleStations] = useState("ANCS");
   const [formData, setFormData] = useState({
-    category: "CHKLST NOTE - 108 (END)",
+    category: "CHKLST NOTE - 102 (END)",
     zuluDate: dayjs(actionEntry.zuluDate).format("YYYY-MM-DD"),
     time: "",
     operatorInitials: actionEntry.operatorInitials,
@@ -145,7 +145,7 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
 
       setFormData({
         ...formData,
-        category: "CHKLST NOTE - 108 (END)",
+        category: "CHKLST NOTE - 102 (END)",
         zuluDate: dayjs().format("YYYY-MM-DD"),
         time: dayjs().format("HHmm"),
       });
@@ -209,7 +209,7 @@ const Checklist108End = ({ shift, actionEntry, onSubmit }) => {
         <ModalOverlay />
         <ModalContent minW="95VW" bg="gray.900" color="white">
           <ModalHeader>
-            CHKLST NOTE - 108 (END) {formLoading && <Spinner size="sm" />}
+            CHKLST NOTE - 102 (END) {formLoading && <Spinner size="sm" />}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>

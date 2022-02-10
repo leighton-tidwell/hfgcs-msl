@@ -22,7 +22,7 @@ const sampleResults = [
   },
   {
     Id: "3eeee",
-    eventcategory: "CHKLST NOTE - 108 (END)",
+    eventcategory: "CHKLST NOTE - 102 (END)",
     entrydate: dayjs().subtract(1, "day").format("MM/DD/YYYY"),
     entrytime: "2200",
     operatorinitials: "JT",
