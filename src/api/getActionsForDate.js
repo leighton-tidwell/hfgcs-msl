@@ -38,7 +38,7 @@ const getActionsForDate = async (date) => {
     if (dev) return sampleResults.filter((result) => result.entrydate === date);
 
     const data = await axios.get(
-      `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate eq '${date}'`,
+      `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate eq '${date}'&top=5000`,
       {
         headers: {
           Accept: "application/json; odata=verbose",

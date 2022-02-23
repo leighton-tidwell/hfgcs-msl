@@ -92,7 +92,7 @@ const getActionsForRange = async (startDate, endDate) => {
             .format("MM/DD/YYYY");
 
           data = await axios.get(
-            `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate ge '${startCloneObject}' and entrydate le '${endOfMonth}'`,
+            `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate ge '${startCloneObject}' and entrydate le '${endOfMonth}'&$top=5000`,
             {
               headers: {
                 Accept: "application/json; odata=verbose",
@@ -110,7 +110,7 @@ const getActionsForRange = async (startDate, endDate) => {
               process.env.REACT_APP_API
             }/web/lists/getbytitle('eventlog')/items?$filter=entrydate ge '${startOfMonth}' and entrydate le '${endDateObject.format(
               "MM/DD/YYYY"
-            )}'`,
+            )}'&top=5000`,
             {
               headers: {
                 Accept: "application/json; odata=verbose",
@@ -128,7 +128,7 @@ const getActionsForRange = async (startDate, endDate) => {
             .format("MM/DD/YYYY");
 
           data = await axios.get(
-            `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate ge '${startOfMonth}' and entrydate le '${endOfMonth}'`,
+            `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate ge '${startOfMonth}' and entrydate le '${endOfMonth}'&top=5000`,
             {
               headers: {
                 Accept: "application/json; odata=verbose",
@@ -143,7 +143,7 @@ const getActionsForRange = async (startDate, endDate) => {
       }
     } else {
       const data = await axios.get(
-        `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate le '${endDate}' and entrydate ge '${startDate}'`,
+        `${process.env.REACT_APP_API}/web/lists/getbytitle('eventlog')/items?$filter=entrydate le '${endDate}' and entrydate ge '${startDate}'&top=5000`,
         {
           headers: {
             Accept: "application/json; odata=verbose",
